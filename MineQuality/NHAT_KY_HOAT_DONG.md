@@ -422,5 +422,8 @@ Theo dõi chi tiết tiến độ phát triển, thay đổi mã nguồn và cá
 
 ### 3. Kết quả kiểm tra
 - Toàn bộ các bài kiểm thử `FabricIntegrationTest` và `FabricQACheckTest` đạt 100% thành công (5.702 assertions).
-- Đóng gói thành công tệp JAR `mod_mine-fabric-0.1.0.jar` (626.177 bytes) và triển khai trực tiếp vào Prism Launcher:
+- Đóng gói thành công tệp JAR `mod_mine-fabric-0.1.0.jar` (626.789 bytes) và triển khai trực tiếp vào Prism Launcher:
   `C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\mod_mine-fabric-0.1.0.jar`.
+- Đã khắc phục lỗi lệch cao độ ban đầu (vòng tròn ở ngang eo/ngực do gốc tọa độ mô hình LivingEntityRenderer) bằng cách tinh chỉnh `poseStack.translate(0.0f, 1.49f, 0.0f)`.
+- Người dùng đã vào game thực tế và xác nhận thành công rực rỡ qua ảnh chụp in-game (vòng tròn ma thuật xoay mượt mà, áp sát mặt đất dưới chân, phát quang emissive sắc nét không gây tụt FPS).
+
