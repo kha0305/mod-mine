@@ -358,26 +358,22 @@ public final class FabricServerItemManager {
             float health = player.getHealth();
             float maxHealth = player.getMaxHealth();
 
-            // 2. Tu hoi phuc thu dong toc do cao (Passive Vitality) & Nap thanh doi moi giay (20 ticks):
-            if (currentTick % 20 == 0) {
-                // Hoi mau thu dong 2.0 HP (1 qua tim day) moi giay neu mau chua day
-                if (health < maxHealth && health > 0.0f) {
+            // 2. Co che bom day 20 qua tim do ruc (40 HP) ngay lap tuc (Xoa bo hoan toan tim den rong):
+            // Khi mac du bo giap ma mau hien tai chua dat moc toi da 40 HP, lap tuc bom day 100% 2 hang tim do!
+            if (health < maxHealth && health > 0.0f) {
+                if (maxHealth - health >= 10.0f || health <= 20.0f) {
+                    player.setHealth(maxHealth);
+                } else if (currentTick % 20 == 0) {
                     player.heal(2.0f);
-                }
-                // Tu dong nap thanh doi va do bao hoa len toi da
-                net.minecraft.world.food.FoodData foodData = player.getFoodData();
-                if (foodData != null && (foodData.needsFood() || foodData.getFoodLevel() < 20)) {
-                    foodData.eat(1, 1.0f);
                 }
             }
 
-            // 3. Khac phuc triet de loi tim rong (Instant Health Fill):
-            // Neu nguoi choi vua mac giap khien Max Health tang len 40 HP nhung mau con thap (tim den),
-            // cap ngay REGENERATION II de bom day 2 hang tim trong tich tac!
-            if (health < maxHealth && health > 0.0f) {
-                player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                        net.minecraft.world.effect.MobEffects.REGENERATION, 40, 1, true, false, false
-                ));
+            // 3. Tu dong nap day thanh doi va do bao hoa moi giay (20 ticks):
+            if (currentTick % 20 == 0) {
+                net.minecraft.world.food.FoodData foodData = player.getFoodData();
+                if (foodData != null && (foodData.needsFood() || foodData.getFoodLevel() < 20)) {
+                    foodData.eat(2, 1.0f);
+                }
             }
 
             // 4. Cuu sinh khan cap khi mau < 30%
