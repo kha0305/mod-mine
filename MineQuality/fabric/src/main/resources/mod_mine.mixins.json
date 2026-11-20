@@ -9,7 +9,8 @@
     "ItemCombinerMenuMixin"
   ],
   "client": [
-    "AvatarRendererMixin"
+    "AvatarRendererMixin",
+    "LivingEntityRendererAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -243,3 +243,25 @@ Sổ tay theo dõi nguyên nhân gốc rễ và biện pháp phòng ngừa các 
   + Tổng cả bộ cộng dồn chính xác 20 HP, kết hợp với 20 HP gốc đạt đúng 40 HP (20 quả tim đỏ hoàn chỉnh).
 - Cách phòng ngừa:
   + Mọi AttributeModifier có thể trang bị đồng thời ở nhiều vị trí (Head, Chest, Legs, Feet, Hands) bắt buộc phải phân biệt Identifier duy nhất theo vị trí (SlotGroup) để tránh bị cơ chế của Minecraft ghi đè.
+
+---
+
+### [BUG-014] - InvalidMixinException Do Dùng @Shadow Trên Phương Thức Lớp Cha (addLayer Trong AvatarRenderer)
+- Thời gian: 2026-11-20
+- Hiện tượng lỗi:
+  + Game Minecraft 26.3 Client bị crash ngay tại màn hình khởi động với thông báo:
+    `InvalidMixinException: @Shadow method addLayer(Lnet/minecraft/client/renderer/entity/layers/RenderLayer;)Z in mod_mine.mixins.json:AvatarRendererMixin from mod mod_mine was not located in the target class net.minecraft.client.renderer.entity.player.AvatarRenderer. No refMap loaded.`
+- Nguyên nhân gốc rễ (Root Cause):
+  + Chú thích `@Shadow` của SpongePowered Mixin chỉ thực hiện tra cứu trên các trường và phương thức được khai báo trực tiếp bên trong lớp mục tiêu (target class `AvatarRenderer`).
+  + Phương thức `addLayer` thực tế được định nghĩa và triển khai ở lớp cha `LivingEntityRenderer`, không nằm trực tiếp trong bytecode của `AvatarRenderer`.
+  + Khi Mixin Processor phân tích và gắn kết method, việc không tìm thấy `addLayer` trên `AvatarRenderer` dẫn đến ngoại lệ `InvalidMixinException`.
+- Tệp và dòng liên quan:
+  + [AvatarRendererMixin.java](file:///D:/tool/mod-mine/MineQuality/fabric/src/main/java/com/minequality/fabric/mixin/AvatarRendererMixin.java): Khai báo `@Shadow protected abstract boolean addLayer(...)`.
+  + [mod_mine.mixins.json](file:///D:/tool/mod-mine/MineQuality/fabric/src/main/resources/mod_mine.mixins.json): Cấu hình mixin phía client.
+- Cách khắc phục:
+  + Loại bỏ hoàn toàn `@Shadow` khỏi `AvatarRendererMixin`.
+  + Tạo mixin interface trung gian [LivingEntityRendererAccessor.java](file:///D:/tool/mod-mine/MineQuality/fabric/src/main/java/com/minequality/fabric/mixin/LivingEntityRendererAccessor.java) nhắm trực tiếp vào lớp cha `LivingEntityRenderer` với `@Accessor("layers") List<RenderLayer> minequality$getLayers()`.
+  + Trong constructor của `AvatarRendererMixin`, ép kiểu thể hiện đối tượng sang `LivingEntityRendererAccessor` và thêm trực tiếp `MagicCircleRenderLayer` vào danh sách layers: `accessor.minequality$getLayers().add(new MagicCircleRenderLayer(self))`.
+  + Đăng ký `LivingEntityRendererAccessor` vào danh sách mixin client trong `mod_mine.mixins.json`.
+- Cách phòng ngừa:
+  + Tuyệt đối không dùng `@Shadow` để truy cập các thành viên thuộc lớp cha (superclass). Luôn tạo `@Accessor` hoặc `@Invoker` trỏ trực tiếp vào lớp cha nơi thành viên đó thực sự được khai báo.
