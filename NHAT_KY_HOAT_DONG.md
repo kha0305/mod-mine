@@ -282,3 +282,24 @@ Theo dõi chi tiết tiến độ phát triển, thay đổi mã nguồn và cá
 - Chạy thành công toàn bộ 5.699 assertions trong `FabricQACheckTest` và `FabricIntegrationTest` (100% pass).
 - Đã đóng gói bản JAR đầy đủ (53.464 bytes) và cập nhật trực tiếp vào thư mục mods của Prism Launcher:
   `C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\mod_mine-fabric-0.1.0.jar`.
+
+
+---
+
+## [2026-11-20] - Xử Lý Lỗi Rèn Lại Trên Đe Bằng AnvilMenuMixin (BUG-008)
+
+### 1. Mục tiêu kỹ thuật
+- Khắc phục triệt để hiện tượng ô kết quả Đe (Anvil) bị khóa rỗng khi đặt trang bị còn đầy độ bền và nguyên liệu rèn.
+- Kích hoạt cơ chế rèn lại (Reforge) theo tài liệu thiết kế: tiêu hao đúng 1 nguyên liệu, tính toán chi phí EXP trần 30 cấp và cập nhật phẩm chất mới khi nhặt đồ ra.
+- Tích hợp Sponge Mixin chính thức cho Fabric Loader.
+
+### 2. Danh sách tệp đã chỉnh sửa/tạo mới
+- [AnvilMenuMixin.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/mixin/AnvilMenuMixin.java): Mixin can thiệp `createResult` và `onTake` của `AnvilMenu`.
+- [mod_mine.mixins.json](file:///D:/tool/mod-mine/fabric/src/main/resources/mod_mine.mixins.json): Cấu hình Mixin cho Fabric.
+- [fabric.mod.json](file:///D:/tool/mod-mine/fabric/src/main/resources/fabric.mod.json): Khai báo tệp cấu hình Mixin.
+- [SO_TAY_KIEM_TRA_BUG.md](file:///D:/tool/mod-mine/SO_TAY_KIEM_TRA_BUG.md): Ghi nhận chi tiết lỗi và giải pháp BUG-008.
+
+### 3. Kết quả kiểm tra
+- Chạy thành công toàn bộ 5.699 assertions trong `FabricQACheckTest` và `FabricIntegrationTest` (100% pass).
+- Đã đóng gói bản JAR đầy đủ (56.776 bytes) và cập nhật trực tiếp vào thư mục mods của Prism Launcher:
+  `C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\mod_mine-fabric-0.1.0.jar`.

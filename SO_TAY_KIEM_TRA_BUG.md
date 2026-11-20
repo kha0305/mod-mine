@@ -122,3 +122,21 @@ Sổ tay theo dõi nguyên nhân gốc rễ và biện pháp phòng ngừa các 
     - Khi vật phẩm chưa có phẩm chất từ Server (đang ở ô kết quả chế tạo), hiển thị: `§7§oQuality: ??? (Craft to reveal)` và không hiển thị chỉ số để giấu kín phẩm chất trước khi lấy ra.
 - Cách phòng ngừa:
   + Quy tắc bất di bất dịch trong lập trình Mod Multiplayer/Singleplayer Minecraft: *"Dữ liệu trạng thái trò chơi (Gameplay Data/State) bắt buộc phải do Server quản lý và ghi nhận; Client chỉ được phép đọc và hiển thị (Read-Only Rendering), tuyệt đối không được tự ý bốc thăm ngẫu nhiên ở tầng View/Tooltip."*
+
+
+---
+
+### [BUG-008] - Không Thể Rèn Lại Tại Đe (Anvil Không Mở Khóa Ô Kết Quả Cho Trang Bị Đầy Độ Bền)
+- Thời gian: 2026-11-20
+- Hiện tượng lỗi: Người chơi đặt Cúp Sắt (Iron Pickaxe) ở ô 1 và 40 Thỏi Sắt (Iron Ingot) ở ô 2 trên giao diện Đe (Anvil) nhưng ô kết quả bên phải hoàn toàn trống trơn, không có chi phí EXP và không thể thao tác rèn lại.
+- Nguyên nhân gốc rễ (Root Cause):
+  + Logic mặc định của Minecraft Vanilla (`AnvilMenu.createResult`) chỉ chấp nhận nguyên liệu sửa chữa khi trang bị đã bị tổn hại độ bền (`damage > 0`). Khi trang bị còn đầy 100% độ bền, Vanilla mặc định xóa sạch ô kết quả (`resultSlots.setItem(0, EMPTY)` và `cost.set(0)`).
+  + Mod chưa có Mixin can thiệp vào vòng đời xử lý của `AnvilMenu`, dẫn đến việc không thể kích hoạt công thức rèn lại (Reforge) khi trang bị chưa bị hỏng.
+- Cách khắc phục:
+  + Tạo mới tệp cấu hình [mod_mine.mixins.json](file:///D:/tool/mod-mine/fabric/src/main/resources/mod_mine.mixins.json) và đăng ký trong [fabric.mod.json](file:///D:/tool/mod-mine/fabric/src/main/resources/fabric.mod.json).
+  + Triển khai Mixin [AnvilMenuMixin.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/mixin/AnvilMenuMixin.java) can thiệp vào `AnvilMenu`:
+    * Tại `createResult()`: Nếu Vanilla từ chối nhưng ô 1 là trang bị hợp lệ (`QualityItemFilter.isEligible`) và ô 2 là nguyên liệu rèn (`QualityItemFilter.isReforgeMaterial` hoặc `emerald`), hệ thống mở khóa ô kết quả, đặt chi phí nguyên liệu đúng 1 món (`repairItemCountCost = 1`) và tính chi phí EXP theo trần tối đa 30 cấp.
+    * Tại `onTake()`: Khi người chơi nhặt trang bị ra, thực hiện thuật toán rèn lại [QualityItemFilter.performReforge](file:///D:/tool/mod-mine/common/src/main/java/com/minequality/quality/QualityItemFilter.java#L207) (Vùng An Toàn 100% không vỡ đồ, Vùng Mạo Hiểm kiểm tra nguy cơ vỡ đồ / tiêu thụ ngọc lục bảo bảo hiểm, hệ thống Pity tích lũy thất bại), cập nhật thẻ `minequality` vào `DataComponents.CUSTOM_DATA`.
+  + Biên dịch `--release 21`, chạy qua toàn bộ 5.699 assertions kiểm thử đạt 100% và đóng gói JAR mới (56.776 bytes) vào Prism Launcher.
+- Cách phòng ngừa:
+  + Khi mở rộng các khối tương tác Vanilla (Anvil, Smithing Table, Enchanting Table, Brewing Stand), bắt buộc phải sử dụng Mixin để can thiệp vào các điều kiện kiểm tra của Vanilla, không chỉ phụ thuộc vào logic kiểm tra đơn thuần ngoài vòng đời container.
