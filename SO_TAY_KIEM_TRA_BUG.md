@@ -59,3 +59,21 @@ Sổ tay theo dõi nguyên nhân gốc rễ và biện pháp phòng ngừa các 
 - Cách phòng ngừa:
   + Luôn sử dụng `--release 21` cho các dự án Minecraft hiện đại nếu mã nguồn không sử dụng tính năng chỉ có riêng ở các bản Java mới hơn.
   + Khai báo ràng buộc Java trong `fabric.mod.json` ở mức tối thiểu tương thích (`>=21`) thay vì ép người dùng phải dùng đúng bản Java mới nhất.
+
+
+---
+
+### [BUG-005] - Lỗi Thiếu Giao Diện net.fabricmc.api.ModInitializer Trên Entrypoint Fabric
+- Thời gian: 2026-11-20
+- Hiện tượng lỗi: Khởi động game Minecraft trên Fabric Loader bị crash với lỗi:
+  `Caused by: net.fabricmc.loader.api.LanguageAdapterException: Class com.minequality.fabric.MineQualityFabric cannot be cast to net.fabricmc.api.ModInitializer!`
+- Nguyên nhân gốc rễ (Root Cause):
+  + Lớp entrypoint `com.minequality.fabric.MineQualityFabric` khai báo phương thức `onInitialize()` nhưng thiếu từ khóa `implements net.fabricmc.api.ModInitializer`.
+  + Fabric Loader khi kích hoạt stage `main` thực hiện ép kiểu đối tượng entrypoint sang `ModInitializer`. Do không kế thừa giao diện, JVM ném ngoại lệ `ClassCastException`.
+- Cách khắc phục:
+  + Bổ sung thư viện `fabric-loader-0.20.1.jar` vào classpath biên dịch tại `fabric/libs/`.
+  + Khai báo `implements ModInitializer` và thêm `@Override` cho phương thức `onInitialize()` trong [MineQualityFabric.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/MineQualityFabric.java).
+  + Biên dịch lại bằng `--release 21`, đóng gói lại JAR và triển khai ngay vào thư mục mods của Prism Launcher tại `C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\mod_mine-fabric-0.1.0.jar`.
+- Cách phòng ngừa:
+  + Mọi lớp entrypoint của Fabric bắt buộc phải `implements net.fabricmc.api.ModInitializer` (hoặc `ClientModInitializer` cho client, `DedicatedServerModInitializer` cho server).
+  + Thêm quy tắc kiểm tra bytecode bằng `javap` hoặc reflection trong bộ kiểm thử CI để đảm bảo lớp kế thừa đúng giao diện Fabric trước khi phát hành.

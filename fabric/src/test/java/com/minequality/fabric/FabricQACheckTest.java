@@ -92,7 +92,7 @@ public final class FabricQACheckTest {
             assertTrue(content.contains("\"name\": \"MineQuality\""), "name mod phai la MineQuality.");
             assertTrue(content.contains("com.minequality.fabric.MineQualityFabric"), "entrypoint main phai tro vao MineQualityFabric.");
             assertTrue(content.contains("\"minecraft\": \">=26.3\""), "depends phai yeu cau minecraft >=26.3.");
-            assertTrue(content.contains("\"java\": \">=26\""), "depends phai yeu cau java >=26.");
+            assertTrue(content.contains("\"java\": \">=21\""), "depends phai yeu cau java >=21.");
             assertTrue(content.contains("\"fabricloader\": \">=0.19.0\""), "depends phai yeu cau fabricloader >=0.19.0.");
         } catch (Exception e) {
             throw new RuntimeException("Khong the doc tep fabric.mod.json", e);

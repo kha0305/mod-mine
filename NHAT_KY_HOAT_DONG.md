@@ -220,3 +220,18 @@ Theo dõi chi tiết tiến độ phát triển, thay đổi mã nguồn và cá
 - Tệp `mod_mine-fabric-0.1.0.jar` mới đã được ghi đè thành công tại `C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\`.
 - Đã kiểm tra trích xuất `fabric.mod.json` bên trong tệp JAR xác nhận giá trị `"java": ">=21"`.
 - Ghi nhận đầy đủ vào [SO_TAY_KIEM_TRA_BUG.md](file:///D:/tool/mod-mine/SO_TAY_KIEM_TRA_BUG.md).
+
+
+---
+
+## [2026-11-20] - Xử Lý Lỗi Thiếu ModInitializer Trên Fabric Entrypoint (BUG-005)
+
+### 1. Mục tiêu kỹ thuật
+- Khắc phục lỗi crash game: `Class com.minequality.fabric.MineQualityFabric cannot be cast to net.fabricmc.api.ModInitializer!`.
+- Kế thừa chính thức giao diện `net.fabricmc.api.ModInitializer` cho lớp `MineQualityFabric`.
+- Tự động đóng gói lại tệp JAR và cập nhật thẳng vào Prism Launcher mods.
+
+### 2. Kết quả kiểm tra
+- Toàn bộ 5.699 phép kiểm tra trong `FabricQACheckTest` và `FabricIntegrationTest` đều đạt 100% thành công.
+- Tệp `mod_mine-fabric-0.1.0.jar` (47.310 bytes) mới đã được ghi đè thành công vào `C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\`.
+- Đã ghi nhận đầy đủ vào [SO_TAY_KIEM_TRA_BUG.md](file:///D:/tool/mod-mine/SO_TAY_KIEM_TRA_BUG.md).
