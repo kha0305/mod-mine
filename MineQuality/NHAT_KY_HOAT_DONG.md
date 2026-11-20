@@ -1,4 +1,4 @@
-# NHẬT KÝ HOẠT ĐỘNG DỰ ÁN (PROJECT ACTIVITY LOG)
+﻿# NHẬT KÝ HOẠT ĐỘNG DỰ ÁN (PROJECT ACTIVITY LOG)
 
 Theo dõi chi tiết tiến độ phát triển, thay đổi mã nguồn và các quyết định kỹ thuật của dự án mod-mine.
 
@@ -333,16 +333,38 @@ Theo dõi chi tiết tiến độ phát triển, thay đổi mã nguồn và cá
 
 ---
 
-## [2026-11-20] - X? L� Ngo?i L? InvalidMixinException Trong ItemCombinerMenuMixin (BUG-010)
+## [2026-11-20] - X? L� Ngo?i L? InvalidMixinException Trong ItemCombinerMenuMixin (BUG-010)
 
-### 1. M?c ti�u k? thu?t
-- Kh?c ph?c l?i crash game l�c kh?i d?ng do @Shadow method broadcastChanges()V kh�ng t�m th?y trong ItemCombinerMenu.
-- G?i phuong th?c roadcastChanges() c?a AbstractContainerMenu th�ng qua �p ki?u an to�n.
+### 1. M?c ti�u k? thu?t
+- Kh?c ph?c l?i crash game l�c kh?i d?ng do @Shadow method broadcastChanges()V kh�ng t�m th?y trong ItemCombinerMenu.
+- G?i phuong th?c roadcastChanges() c?a AbstractContainerMenu th�ng qua �p ki?u an to�n.
 
-### 2. Danh s�ch t?p d� ch?nh s?a/t?o m?i
-- [ItemCombinerMenuMixin.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/mixin/ItemCombinerMenuMixin.java): Lo?i b? @Shadow th?a v� �p ki?u tr?c ti?p sang AbstractContainerMenu.
+### 2. Danh s�ch t?p d� ch?nh s?a/t?o m?i
+- [ItemCombinerMenuMixin.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/mixin/ItemCombinerMenuMixin.java): Lo?i b? @Shadow th?a v� �p ki?u tr?c ti?p sang AbstractContainerMenu.
 - [SO_TAY_KIEM_TRA_BUG.md](file:///D:/tool/mod-mine/SO_TAY_KIEM_TRA_BUG.md): C?p nh?t h? so l?i BUG-010.
 
 ### 3. K?t qu? ki?m tra
-- To�n b? 5.699 assertions ki?m th? d?t 100%.
-- �� d�ng g�i l?i b?n JAR m?i (133.739 bytes) v� tri?n khai v�o Prism Launcher.
+- To�n b? 5.699 assertions ki?m th? d?t 100%.
+- �� d�ng g�i l?i b?n JAR m?i (133.739 bytes) v� tri?n khai v�o Prism Launcher.
+
+
+---
+
+## [2026-11-20] - Kích Hoạt Data Components Chống Hỏng, Chống Cháy Và Hiệu Ứng Haste II Cho Trang Bị Huyền Thoại (BUG-011)
+
+### 1. Mục tiêu kỹ thuật
+- Khắc phục triệt để lỗi trang bị Huyền thoại bị trừ độ bền và bị thiêu cháy trong dung nham bằng cách gán trực tiếp Data Components nguyên bản của Vanilla Minecraft.
+- Kích hoạt hiệu ứng thực tế Haste II khi người chơi cầm công cụ khai khoáng Huyền thoại trên tay chính.
+- Bổ sung cơ chế tự sửa chữa và đồng bộ dữ liệu (Self-healing Inventory) giúp các trang bị cũ tự động nhận đủ các thuộc tính mới mà không cần rèn lại.
+
+### 2. Danh sách tệp đã chỉnh sửa
+- [FabricServerItemManager.java](file:///D:/tool/mod-mine/MineQuality/fabric/src/main/java/com/minequality/fabric/event/FabricServerItemManager.java): Triển khai applyNativeComponents, tự động đồng bộ túi đồ và kích hoạt vòng lặp updatePlayerEffects mỗi giây.
+- [AnvilMenuMixin.java](file:///D:/tool/mod-mine/MineQuality/fabric/src/main/java/com/minequality/fabric/mixin/AnvilMenuMixin.java): Áp dụng native components khi hoàn tất rèn đồ tại Đe.
+- [ItemCombinerMenuMixin.java](file:///D:/tool/mod-mine/MineQuality/fabric/src/main/java/com/minequality/fabric/mixin/ItemCombinerMenuMixin.java): Áp dụng native components khi hiển thị xem trước tại Đe.
+- [FabricQACheckTest.java](file:///D:/tool/mod-mine/MineQuality/fabric/src/test/java/com/minequality/fabric/FabricQACheckTest.java): Cập nhật đường dẫn động cho cấu trúc thư mục mới MineQuality/.
+- [SO_TAY_KIEM_TRA_BUG.md](file:///D:/tool/mod-mine/MineQuality/SO_TAY_KIEM_TRA_BUG.md): Ghi nhận hồ sơ lỗi BUG-011.
+
+### 3. Kết quả kiểm tra
+- Toàn bộ 5.699 assertions kiểm thử tự động vượt qua 100%.
+- Đã đóng gói tệp JAR mới mod_mine-fabric-0.1.0.jar (135.557 bytes) và triển khai vào thư mục mods của Prism Launcher:
+  C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\mod_mine-fabric-0.1.0.jar.

@@ -73,6 +73,7 @@ public abstract class ItemCombinerMenuMixin {
                 }
 
                 ItemStack resultStack = input.copy();
+                com.minequality.fabric.event.FabricServerItemManager.applyNativeComponents(resultStack, currentData);
                 this.resultSlots.setItem(0, resultStack);
                 ((net.minecraft.world.inventory.AbstractContainerMenu) (Object) this).broadcastChanges();
             }

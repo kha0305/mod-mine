@@ -3,6 +3,7 @@ package com.minequality.fabric.mixin;
 import com.minequality.fabric.event.FabricTooltipHandler;
 import com.minequality.quality.ItemQualityData;
 import com.minequality.quality.QualityItemFilter;
+import com.minequality.quality.QualityTier;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
@@ -77,6 +78,7 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu {
                 this.repairItemCountCost = 1;
 
                 ItemStack resultStack = input.copy();
+                com.minequality.fabric.event.FabricServerItemManager.applyNativeComponents(resultStack, currentData);
                 this.resultSlots.setItem(0, resultStack);
                 this.broadcastChanges();
             }
@@ -135,12 +137,13 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu {
         }
 
         // Cap nhat pham chat moi cho trang bi
+        boolean isLegendary = (outcome.resultingTier() == QualityTier.LEGENDARY);
         ItemQualityData newData = new ItemQualityData(
                 outcome.resultingTier(),
                 Math.min(100, currentData.affinity() + 5),
                 outcome.nextReforgeCount(),
-                currentData.fireproof(),
-                currentData.unbreakable()
+                currentData.fireproof() || isLegendary,
+                currentData.unbreakable() || isLegendary
         );
 
         net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, stack, tag -> {
@@ -152,5 +155,8 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu {
             qTag.putBoolean("unbreakable", newData.unbreakable());
             tag.put("minequality", qTag);
         });
+
+        // Gan truc tiep cac component goc cua Minecraft (Unbreakable va DamageResistant)
+        com.minequality.fabric.event.FabricServerItemManager.applyNativeComponents(stack, newData);
     }
 }

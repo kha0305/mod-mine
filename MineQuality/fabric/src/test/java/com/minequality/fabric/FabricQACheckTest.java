@@ -82,7 +82,9 @@ public final class FabricQACheckTest {
      */
     private static void testFabricMetadata() {
         System.out.println("[MUC 1] Kiem tra metadata fabric.mod.json...");
-        Path jsonPath = Path.of("fabric", "src", "main", "resources", "fabric.mod.json");
+        Path jsonPath = Files.exists(Path.of("MineQuality", "fabric", "src", "main", "resources", "fabric.mod.json"))
+                ? Path.of("MineQuality", "fabric", "src", "main", "resources", "fabric.mod.json")
+                : Path.of("fabric", "src", "main", "resources", "fabric.mod.json");
         assertTrue(Files.exists(jsonPath), "Tep fabric.mod.json phai ton tai tren dia.");
 
         try {

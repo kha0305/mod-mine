@@ -1,4 +1,4 @@
-# SỔ TAY KIỂM TRA LỖI VÀ CHỐNG HỒI QUY (BUG JOURNAL & REGRESSION PREVENTION)
+﻿# SỔ TAY KIỂM TRA LỖI VÀ CHỐNG HỒI QUY (BUG JOURNAL & REGRESSION PREVENTION)
 
 Sổ tay theo dõi nguyên nhân gốc rễ và biện pháp phòng ngừa các lỗi kỹ thuật phát sinh trong quá trình phát triển mod-mine.
 
@@ -167,16 +167,40 @@ Sổ tay theo dõi nguyên nhân gốc rễ và biện pháp phòng ngừa các 
 
 ---
 
-### [BUG-010] - Ngo?i L? InvalidMixinException Do Khai B�o @Shadow Method Thu?c L?p Cha
+### [BUG-010] - Ngo?i L? InvalidMixinException Do Khai B�o @Shadow Method Thu?c L?p Cha
 - Th?i gian: 2026-11-20
 - Hi?n tu?ng l?i: Kh?i d?ng game b? d?ng ngay t?i giai do?n t?i Mixin Bootstrap v?i l?i:
   `InvalidMixinException: @Shadow method broadcastChanges()V in mod_mine.mixins.json:ItemCombinerMenuMixin from mod mod_mine was not located in the target class net.minecraft.world.inventory.ItemCombinerMenu. No refMap loaded.`
-- Nguy�n nh�n g?c r? (Root Cause):
-  + Phuong th?c `broadcastChanges()` thu?c v? l?p cha `AbstractContainerMenu` ch? kh�ng du?c khai b�o d� (override) trong `ItemCombinerMenu`.
-  + SpongeMixin quy d?nh tru?ng ho?c phuong th?c `@Shadow` b?t bu?c ph?i t?n t?i tr?c ti?p tr�n l?p m?c ti�u (Target Class). Do `ItemCombinerMenu` kh�ng ch?a phuong th?c n�y, qu� tr�nh �nh x? Mixin th?t b?i v� g�y crash game ngay l�c kh?i d?ng.
-- C�ch kh?c ph?c:
-  + Trong [ItemCombinerMenuMixin.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/mixin/ItemCombinerMenuMixin.java): X�a b? khai b�o `@Shadow public abstract void broadcastChanges();`.
-  + Thay th? l?nh g?i b?ng �p ki?u ?o h?p l? trong Java: `((net.minecraft.world.inventory.AbstractContainerMenu) (Object) this).broadcastChanges();`.
-  + Bi�n d?ch l?i, ch?y 5.699 assertions ki?m th? d?t 100% v� tri?n khai t?p JAR m?i (133.739 bytes) v�o thu m?c mods c?a Prism Launcher.
-- C�ch ph�ng ng?a:
-  + Tuy?t d?i kh�ng khai b�o `@Shadow` cho c�c phuong th?c ho?c tru?ng thu?c v? l?p cha c?a l?p m?c ti�u. N?u c?n g?i phuong th?c l?p cha, h�y �p ki?u d?i tu?ng `(SuperClass) (Object) this` v� g?i b�nh thu?ng.
+- Nguy�n nh�n g?c r? (Root Cause):
+  + Phuong th?c `broadcastChanges()` thu?c v? l?p cha `AbstractContainerMenu` ch? kh�ng du?c khai b�o d� (override) trong `ItemCombinerMenu`.
+  + SpongeMixin quy d?nh tru?ng ho?c phuong th?c `@Shadow` b?t bu?c ph?i t?n t?i tr?c ti?p tr�n l?p m?c ti�u (Target Class). Do `ItemCombinerMenu` kh�ng ch?a phuong th?c n�y, qu� tr�nh �nh x? Mixin th?t b?i v� g�y crash game ngay l�c kh?i d?ng.
+- C�ch kh?c ph?c:
+  + Trong [ItemCombinerMenuMixin.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/mixin/ItemCombinerMenuMixin.java): X�a b? khai b�o `@Shadow public abstract void broadcastChanges();`.
+  + Thay th? l?nh g?i b?ng �p ki?u ?o h?p l? trong Java: `((net.minecraft.world.inventory.AbstractContainerMenu) (Object) this).broadcastChanges();`.
+  + Bi�n d?ch l?i, ch?y 5.699 assertions ki?m th? d?t 100% v� tri?n khai t?p JAR m?i (133.739 bytes) v�o thu m?c mods c?a Prism Launcher.
+- C�ch ph�ng ng?a:
+  + Tuy?t d?i kh�ng khai b�o `@Shadow` cho c�c phuong th?c ho?c tru?ng thu?c v? l?p cha c?a l?p m?c ti�u. N?u c?n g?i phuong th?c l?p cha, h�y �p ki?u d?i tu?ng `(SuperClass) (Object) this` v� g?i b�nh thu?ng.
+
+
+---
+
+### [BUG-011] - Trang Bị Huyền Thoại Bị Mất Độ Bền, Bị Thiêu Cháy Trong Dung Nham Và Không Nhận Hiệu Ứng Haste II Khi Cầm
+- Thời gian: 2026-11-20
+- Hiện tượng lỗi:
+  + Người chơi cầm Cúp Kim Cương bậc Huyền thoại (Diamond Pickaxe - Legendary) đập đá thì độ bền vẫn bị trừ hao (1560 / 1561).
+  + Ném vật phẩm xuống dung nham hoặc lửa thì vật phẩm vẫn bị thiêu cháy tiêu biến.
+  + Cầm cúp trên tay chính nhưng không thấy biểu tượng và trạng thái Đào nhanh (Haste II) tác dụng lên người chơi.
+- Nguyên nhân gốc rễ (Root Cause):
+  + Mod trước đó chỉ lưu trữ các cờ đánh dấu fireproof: 1b, unbreakable: 1b bên trong thẻ tùy biến custom_data (DataComponents.CUSTOM_DATA -> minequality). Minecraft 26.3 xử lý cơ chế không thể vỡ và chống cháy hoàn toàn dựa vào Data Components nguyên bản của Vanilla (DataComponents.UNBREAKABLE kiểu Unit.INSTANCE và DataComponents.DAMAGE_RESISTANT kiểu DamageResistant chứa tag DamageTypeTags.IS_FIRE). Do thiếu việc gán trực tiếp Data Components nguyên bản, động cơ Vanilla vẫn áp dụng logic trừ độ bền và thiêu hủy vật phẩm khi rơi vào lửa.
+  + Hiệu ứng Đào nhanh II (Haste II) của công cụ Huyền thoại mới chỉ được định nghĩa ở tầng hiển thị Tooltip, chưa được tích hợp vào vòng lặp xử lý sự kiện Server Tick (ServerTickEvents.END_SERVER_TICK), dẫn đến việc người chơi không được cấp hiệu ứng thực tế (MobEffectInstance).
+- Cách khắc phục:
+  + Trong [FabricServerItemManager.java](file:///D:/tool/mod-mine/MineQuality/fabric/src/main/java/com/minequality/fabric/event/FabricServerItemManager.java):
+    * Triển khai hàm applyNativeComponents(ItemStack stack, ItemQualityData data): Gán trực tiếp DataComponents.UNBREAKABLE với giá trị Unit.INSTANCE, đồng thời tự động khôi phục độ bền về nguyên vẹn stack.setDamageValue(0).
+    * Sao chép thành phần chống sát thương lửa chuẩn từ thỏi Netherite Items.NETHERITE_INGOT.components().get(DataComponents.DAMAGE_RESISTANT) và gán vào DataComponents.DAMAGE_RESISTANT của trang bị Huyền thoại.
+    * Bổ sung cơ chế tự phục hồi và đồng bộ (Self-healing Sync) trong ensureQualityAssigned: Khi người chơi mở túi đồ hoặc tương tác, hệ thống tự động kiểm tra và gán bù UNBREAKABLE cùng DAMAGE_RESISTANT cho các trang bị Huyền thoại đã tồn tại sẵn từ trước.
+    * Triển khai phương thức updatePlayerEffects(ServerPlayer player, int currentTick) chạy theo chu kỳ mỗi 20 ticks (1 giây) trên ServerTickEvents.END_SERVER_TICK: Cầm công cụ khai khoáng Huyền thoại trên tay chính sẽ liên tục nhận hiệu ứng MobEffects.HASTE cấp 2 (thời lượng 40 ticks, ambient true, showIcon true); công cụ Phế liệu bị phạt MINING_FATIGUE; vũ khí Phế liệu bị phạt WEAKNESS; mặc đủ 4 món giáp Huyền thoại nhận Kháng lửa vĩnh cửu và kích hoạt Cứu sinh khẩn cấp (Kháng cự I + Hồi máu I) khi lượng máu dưới 30%.
+  + Trong [AnvilMenuMixin.java](file:///D:/tool/mod-mine/MineQuality/fabric/src/main/java/com/minequality/fabric/mixin/AnvilMenuMixin.java) và [ItemCombinerMenuMixin.java](file:///D:/tool/mod-mine/MineQuality/fabric/src/main/java/com/minequality/fabric/mixin/ItemCombinerMenuMixin.java): Kích hoạt applyNativeComponents khi xem trước và khi lấy thành phẩm ra khỏi Đe.
+  + Biên dịch thành công với --release 21, vượt qua toàn bộ 5.699 assertions kiểm thử đạt 100% và triển khai tệp JAR mới (135.557 bytes) vào Prism Launcher.
+- Cách phòng ngừa:
+  + Mọi tính chất vật lý hoặc khả năng phòng vệ đặc biệt của trang bị Minecraft (Không vỡ, Chống cháy, Chống nổ) bắt buộc phải được gắn trực tiếp vào Data Components nguyên bản của Vanilla Minecraft, không lưu trữ đơn lẻ trong custom_data.
+  + Bất kỳ hiệu ứng trạng thái chủ động nào được quảng bá trên giao diện Tooltip bắt buộc phải có logic tương ứng ở tầng Server Tick để áp dụng thực tế lên thực thể người chơi.
