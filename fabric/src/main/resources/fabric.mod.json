@@ -16,6 +16,9 @@
   "entrypoints": {
     "main": [
       "com.minequality.fabric.MineQualityFabric"
+    ],
+    "client": [
+      "com.minequality.fabric.client.MineQualityFabricClient"
     ]
   },
   "depends": {

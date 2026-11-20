@@ -235,3 +235,26 @@ Theo dõi chi tiết tiến độ phát triển, thay đổi mã nguồn và cá
 - Toàn bộ 5.699 phép kiểm tra trong `FabricQACheckTest` và `FabricIntegrationTest` đều đạt 100% thành công.
 - Tệp `mod_mine-fabric-0.1.0.jar` (47.310 bytes) mới đã được ghi đè thành công vào `C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\`.
 - Đã ghi nhận đầy đủ vào [SO_TAY_KIEM_TRA_BUG.md](file:///D:/tool/mod-mine/SO_TAY_KIEM_TRA_BUG.md).
+
+
+---
+
+## [2026-11-20] - Xử Lý Lỗi Mod Không Hoạt Động & Kết Nối Fabric Tooltip Callback Thực Tế (BUG-006)
+
+### 1. Mục tiêu kỹ thuật
+- Khắc phục triệt để hiện tượng mod không hiển thị phẩm chất và không hoạt động trong game thực tế khi người chơi chế tạo trang bị (Iron Pickaxe) trên Fabric 26.3.
+- Kết nối mã nguồn với Fabric Item API v1 (`ItemTooltipCallback.EVENT`) và cơ chế lưu trữ Minecraft 26.3 `DataComponents.CUSTOM_DATA`.
+- Triển khai cơ chế bốc thăm tự động On-Demand: Trang bị hợp lệ bất kỳ khi được hiển thị đều tự động bốc thăm phẩm chất và lưu vĩnh viễn vào thẻ NBT `minequality`.
+- Định dạng màu sắc Minecraft chuẩn đẹp mắt cho từng cấp bậc và chỉ số thuộc tính.
+
+### 2. Danh sách tệp đã chỉnh sửa/tạo mới
+- [MineQualityFabricClient.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/client/MineQualityFabricClient.java): Khởi tạo entrypoint ClientModInitializer.
+- [FabricTooltipHandler.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/event/FabricTooltipHandler.java): Hook `ItemTooltipCallback.EVENT`, logic On-Demand Roll và format mã màu `§`.
+- [fabric.mod.json](file:///D:/tool/mod-mine/fabric/src/main/resources/fabric.mod.json): Khai báo entrypoint `"client"`.
+- [fabric/build.gradle](file:///D:/tool/mod-mine/fabric/build.gradle): Bổ sung liên kết thư viện cục bộ `fabric/libs/*.jar`.
+- [SO_TAY_KIEM_TRA_BUG.md](file:///D:/tool/mod-mine/SO_TAY_KIEM_TRA_BUG.md): Ghi nhận chi tiết nguyên nhân gốc và giải pháp BUG-006.
+
+### 3. Kết quả kiểm tra
+- Chạy thành công toàn bộ 5.699 assertions trong `FabricQACheckTest` và `FabricIntegrationTest` (100% pass).
+- Đã đóng gói bản JAR đầy đủ (50.955 bytes) và triển khai thành công vào thư mục mods của Prism Launcher:
+  `C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\mod_mine-fabric-0.1.0.jar`.

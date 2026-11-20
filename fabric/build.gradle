@@ -5,4 +5,7 @@ plugins {
 dependencies {
     implementation project(":common")
     compileOnly "org.jetbrains:annotations:24.1.0"
+    compileOnly fileTree(dir: "libs", include: ["*.jar"])
+    testImplementation fileTree(dir: "libs", include: ["*.jar"])
 }
+

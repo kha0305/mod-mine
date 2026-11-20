@@ -77,3 +77,23 @@ Sổ tay theo dõi nguyên nhân gốc rễ và biện pháp phòng ngừa các 
 - Cách phòng ngừa:
   + Mọi lớp entrypoint của Fabric bắt buộc phải `implements net.fabricmc.api.ModInitializer` (hoặc `ClientModInitializer` cho client, `DedicatedServerModInitializer` cho server).
   + Thêm quy tắc kiểm tra bytecode bằng `javap` hoặc reflection trong bộ kiểm thử CI để đảm bảo lớp kế thừa đúng giao diện Fabric trước khi phát hành.
+
+
+---
+
+### [BUG-006] - Mod Không Hoạt Động Trong Game Thực Tế (Không Hiện Phẩm Chất & Tooltip Trống)
+- Thời gian: 2026-11-20
+- Hiện tượng lỗi: Khởi động game thành công nhưng khi người chơi chế tạo Cúp Sắt (Iron Pickaxe) hoặc rê chuột xem trang bị thì Tooltip chỉ hiển thị thông tin mặc định của Minecraft Vanilla, hoàn toàn không có dòng phẩm chất hay chỉ số mở rộng của mod.
+- Nguyên nhân gốc rễ (Root Cause):
+  + [FabricTooltipHandler.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/event/FabricTooltipHandler.java) ban đầu chỉ là mock POJO (chỉ gán cờ `registered = true`), chưa kết nối vào Fabric API client thực tế `net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback.EVENT`.
+  + Tệp cấu hình [fabric.mod.json](file:///D:/tool/mod-mine/fabric/src/main/resources/fabric.mod.json) thiếu entrypoint client `"client": ["com.minequality.fabric.client.MineQualityFabricClient"]`.
+  + Thiếu cơ chế tự động bốc thăm và lưu trữ phẩm chất (On-Demand Roll & Save) cho các trang bị vừa được chế tạo hoặc lấy từ kho đồ vào thành phần `DataComponents.CUSTOM_DATA`.
+- Cách khắc phục:
+  + Tạo mới lớp [MineQualityFabricClient.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/client/MineQualityFabricClient.java) triển khai `ClientModInitializer`.
+  + Triển khai logic thực tế trong [FabricTooltipHandler.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/event/FabricTooltipHandler.java): Đăng ký `ItemTooltipCallback.EVENT`, tự động bốc thăm `QualityManager.rollQuality()` khi trang bị đủ điều kiện (`QualityItemFilter.isEligible`) chưa có dữ liệu và lưu an toàn vào `DataComponents.CUSTOM_DATA`.
+  + Bổ sung bộ định dạng mã màu sắc Minecraft chuẩn (`§6`, `§d`, `§9`, `§a`, `§f`, `§8`, `§2`, `§c`, `§b`) và chèn dòng Component vào Tooltip ngay dưới tên trang bị.
+  + Khai báo entrypoint `"client"` trong [fabric.mod.json](file:///D:/tool/mod-mine/fabric/src/main/resources/fabric.mod.json).
+  + Biên dịch lại bằng `--release 21`, đóng gói thành `mod_mine-fabric-0.1.0.jar` (50.955 bytes) và triển khai ngay vào Prism Launcher.
+- Cách phòng ngừa:
+  + Luôn tích hợp trực tiếp với API sự kiện thực tế của Loader (`ItemTooltipCallback` cho Fabric, `ItemTooltipEvent` cho NeoForge/Forge).
+  + Thiết kế cơ chế On-Demand Roll phòng thủ để đảm bảo bất kỳ trang bị hợp lệ nào xuất hiện trên màn hình người chơi đều tự động sở hữu phẩm chất.
