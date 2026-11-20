@@ -204,3 +204,21 @@ Sổ tay theo dõi nguyên nhân gốc rễ và biện pháp phòng ngừa các 
 - Cách phòng ngừa:
   + Mọi tính chất vật lý hoặc khả năng phòng vệ đặc biệt của trang bị Minecraft (Không vỡ, Chống cháy, Chống nổ) bắt buộc phải được gắn trực tiếp vào Data Components nguyên bản của Vanilla Minecraft, không lưu trữ đơn lẻ trong custom_data.
   + Bất kỳ hiệu ứng trạng thái chủ động nào được quảng bá trên giao diện Tooltip bắt buộc phải có logic tương ứng ở tầng Server Tick để áp dụng thực tế lên thực thể người chơi.
+
+---
+
+### [BUG-012] - Hàng Tim Đen Rỗng Khi Tăng Máu Tối Đa & Trùng Lặp Chỉ Số Thuộc Tính Ở Đáy Tooltip
+- Thời gian: 2026-11-20
+- Hiện tượng lỗi:
+  + Khi người chơi mặc trang bị tăng Máu tối đa (Max Health), thanh máu xuất hiện 10 quả tim đen rỗng ở hàng trên, tốc độ hồi máu quá chậm khiến thanh máu lâu đầy gây hiểu lầm là lỗi mất máu.
+  + Ở đáy Tooltip xuất hiện một khối thuộc tính Vanilla trùng lặp lộn xộn (When on Legs: +6 Armor, +2 Armor Toughness, +6 Max Health, +2 Armor, +2 Armor Toughness, +0.5 Knockback Resistance, Unbreakable...).
+- Nguyên nhân gốc rễ (Root Cause):
+  + Khi tăng thuộc tính MAX_HEALTH bằng ItemAttributeModifiers, Minecraft chỉ nâng giới hạn trần máu mà không tự động nạp lượng máu hiện tại (health vẫn giữ 20.0 trên trần 40.0). Cơ chế hồi cũ (3 giây/1 HP) mất tới 60 giây mới làm đầy máu.
+  + Mod đăng ký AttributeModifiers mà không kèm cờ ItemAttributeModifiers.Display.hidden(), khiến cả Mod lẫn Vanilla đều đồng thời in các dòng thuộc tính ra Tooltip.
+- Cách khắc phục:
+  + Áp dụng ItemAttributeModifiers.Display.hidden() cho toàn bộ thuộc tính, đồng thời loại bỏ các dòng Vanilla Attribute trùng lặp ở cuối danh sách Tooltip.
+  + Nâng cấp toàn diện Tooltip theo phong cách RPG cao cấp: đường kẻ phân cách thanh mảnh ────────────────────────────, icon ngôi sao ✦, tên vật phẩm đổi màu theo phẩm chất.
+  + Triển khai cơ chế bơm đầy máu thần tốc (Instant Health Fill): hồi 2.0 HP mỗi giây kèm kích hoạt hiệu ứng Hồi máu II (Regen II) tự động khi có tim rỗng, giúp bơm đầy 2 hàng tim đỏ rực chỉ trong 2-3 giây.
+- Cách phòng ngừa:
+  + Khi tùy biến thuộc tính trang bị hiển thị qua Tooltip riêng của mod, luôn ẩn thuộc tính gốc qua Display.hidden() để tránh bị Vanilla in lặp lại.
+  + Khi thay đổi thuộc tính Máu tối đa của sinh vật, luôn đồng bộ việc hồi máu tương ứng để tránh tình trạng xuất hiện tim đen rỗng.
