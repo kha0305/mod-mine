@@ -43,6 +43,7 @@ public final class FabricQACheckTest {
         testFabricCombatFullArmorSetAndEmergencyRecovery();
         testFabricCombatSpecialWeapons();
         testFabricLoadAndStressTesting();
+        testMagicCircleLayerAndAssets();
 
         long elapsedTime = System.currentTimeMillis() - startTime;
 
@@ -584,5 +585,18 @@ public final class FabricQACheckTest {
 
         long elapsed = System.currentTimeMillis() - start;
         System.out.println("  -> 30,000 luot goi stress test hoan tat thanh cong trong " + elapsed + " ms (khong ro ri null, khong ngoai le).");
+    }
+
+    private static void testMagicCircleLayerAndAssets() throws Exception {
+        System.out.println("[MUC 14] Kiem tra MagicCircleRenderLayer va Texture Tai Nguyen...");
+
+        java.io.File textureFile = new java.io.File("MineQuality/fabric/src/main/resources/assets/minequality/textures/entity/magic_circle.png");
+        assertTrue(textureFile.exists(), "Tep texture magic_circle.png phai ton tai!");
+        assertTrue(textureFile.length() > 50000, "Kich thuoc texture phai hop le (> 50KB)!");
+
+        Class<?> clazz = Class.forName("com.minequality.fabric.client.render.MagicCircleRenderLayer");
+        assertTrue(clazz != null, "Lop MagicCircleRenderLayer phai duoc ClassLoader tai thanh cong!");
+
+        System.out.println("  -> MagicCircleRenderLayer va Texture Magic Circle dat chuan 100%.");
     }
 }

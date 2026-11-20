@@ -395,3 +395,32 @@ Theo dõi chi tiết tiến độ phát triển, thay đổi mã nguồn và cá
 ### 3. Kết quả kiểm tra
 - 5.699 assertions kiểm thử tự động đạt 100%.
 - Tệp JAR mới mod_mine-fabric-0.1.0.jar (138.116 bytes) đã triển khai trực tiếp vào Prism Launcher.
+
+---
+
+## [2026-11-20] - Triển Khai Demo Vòng Tròn Ma Thuật (Magic Circle Render Layer) Dưới Chân Người Chơi (Minecraft 26.3 Client)
+
+### 1. Mục tiêu kỹ thuật
+- Tích hợp tài nguyên hình ảnh vòng tròn ma thuật màu xanh dương (Blue Magic Circle) do người dùng cung cấp vào gói tài nguyên mod (`assets/minequality/textures/entity/magic_circle.png`).
+- Xây dựng tầng vẽ tùy chỉnh `MagicCircleRenderLayer` tích hợp vào kiến trúc Render State mới của Minecraft 26.3 (`AvatarRenderer` và `AvatarRenderState`).
+- Tối ưu hóa hiệu năng tuyệt đối (Zero FPS Drop):
+  + Mô hình phẳng 1-Quad với 2 mặt (8 đỉnh), không tạo đối tượng rác bộ nhớ trong vòng lặp kết xuất.
+  + Cơ chế xoay mượt mà quanh trục Y (`angle = state.ageInTicks * 1.5f`) tương đương chu kỳ 12 giây cho 1 vòng 360 độ.
+  + Hiệu ứng thở nhẹ (Pulse Breathing effect: nhấp nhô biên độ 3% kích thước tạo cảm giác ma thuật sống động).
+  + RenderType phát quang độc lập (`RenderTypes.entityTranslucentEmissive`), tự phát sáng rực rỡ trong bóng tối mà không phụ thuộc ánh sáng môi trường.
+- Đăng ký tự động qua `AvatarRendererMixin` vào `AvatarRenderer`.
+- Bổ sung cơ chế kích hoạt thông minh:
+  + Tự động kích hoạt khi người chơi trang bị bất kỳ món đồ Huyền thoại nào (Mũ, Áo, Quần, Giày, Tay chính, Tay phụ).
+  + Hỗ trợ chế độ thử nghiệm (Demo Trigger): người chơi có thể cầm que gậy (Stick), mảnh thạch anh tím (Amethyst Shard), sao Nether (Nether Star) hoặc bất kỳ trang bị nào có phẩm chất từ Rare trở lên để chiêm ngưỡng hiệu ứng ngay khi vào thế giới mới.
+
+### 2. Danh sách tệp đã tạo & cập nhật
+- [MagicCircleRenderLayer.java](file:///D:/tool/mod-mine/MineQuality/fabric/src/main/java/com/minequality/fabric/client/render/MagicCircleRenderLayer.java): Lớp RenderLayer tính toán ma trận xoay, kích thước thở và nạp đỉnh vào `SubmitNodeCollector`.
+- [AvatarRendererMixin.java](file:///D:/tool/mod-mine/MineQuality/fabric/src/main/java/com/minequality/fabric/mixin/AvatarRendererMixin.java): Mixin can thiệp constructor của `AvatarRenderer` để đính kèm RenderLayer.
+- [mod_mine.mixins.json](file:///D:/tool/mod-mine/MineQuality/fabric/src/main/resources/mod_mine.mixins.json): Đăng ký Client Mixin `AvatarRendererMixin`.
+- [FabricQACheckTest.java](file:///D:/tool/mod-mine/MineQuality/fabric/src/test/java/com/minequality/fabric/FabricQACheckTest.java): Bổ sung Mục 14 kiểm thử tài nguyên texture và tải lớp `MagicCircleRenderLayer`.
+- [magic_circle.png](file:///D:/tool/mod-mine/MineQuality/fabric/src/main/resources/assets/minequality/textures/entity/magic_circle.png): Texture vòng tròn ma thuật màu xanh dương chuẩn 1024x1024 32bpp ARGB.
+
+### 3. Kết quả kiểm tra
+- Toàn bộ các bài kiểm thử `FabricIntegrationTest` và `FabricQACheckTest` đạt 100% thành công (5.702 assertions).
+- Đóng gói thành công tệp JAR `mod_mine-fabric-0.1.0.jar` (626.177 bytes) và triển khai trực tiếp vào Prism Launcher:
+  `C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\mod_mine-fabric-0.1.0.jar`.
