@@ -84,6 +84,14 @@ public final class FabricTooltipHandler {
             return;
         }
 
+        // 1. To mau ten vat pham o dong 0 theo mau pham chat
+        if (!lines.isEmpty()) {
+            String currentName = lines.get(0).getString();
+            if (!currentName.startsWith("§")) {
+                lines.set(0, net.minecraft.network.chat.Component.literal(getTierColorCode(qualityData.tier()) + "§l" + currentName));
+            }
+        }
+
         List<String> rawLines = QualityTooltipBuilder.buildTooltipLines(itemId, qualityData);
         if (rawLines == null || rawLines.isEmpty()) {
             return;
@@ -96,6 +104,14 @@ public final class FabricTooltipHandler {
             }
             String coloredText = applyMinecraftColorFormatting(raw, qualityData.tier());
             lines.add(insertIndex++, net.minecraft.network.chat.Component.literal(coloredText));
+        }
+
+        // 2. Xoa bo triet de cac dong Vanilla Attributes/Unbreakable trung lap o cuoi
+        for (int i = lines.size() - 1; i >= insertIndex; i--) {
+            String str = lines.get(i).getString().trim();
+            if (str.startsWith("When in ") || str.startsWith("When on ") || str.equals("Unbreakable") || str.startsWith("+") || str.startsWith("-")) {
+                lines.remove(i);
+            }
         }
     }
 
@@ -140,67 +156,72 @@ public final class FabricTooltipHandler {
             return "";
         }
 
-        // 1. Dong Phẩm chất: "Quality: <Tier>"
+        // 0. Duong phan cach thanh manh
+        if (line.contains("────")) {
+            return "§8§m────────────────────────────";
+        }
+
+        // 1. Dong Pham chat: "Quality: <Tier>"
         if (line.startsWith("Quality:")) {
             String color = getTierColorCode(tier);
-            return color + "§l" + line;
+            return color + "§l✦ " + line.toUpperCase() + " ✦";
         }
 
         // 2. Dong Do gan bo: "Item Affinity:"
         if (line.startsWith("Item Affinity:")) {
-            return "§b" + line;
+            return "§b✦ " + line;
         }
 
         // 3. Dong Vi tri trang bi: "When in Main Hand:", "When on Body:", v.v.
         if (line.startsWith("When ")) {
-            return "§7" + line;
+            return "§e§l" + line;
         }
 
-        // 4. Dong Chi so cong hoac tru
+        // 4. Dong Chi so cong hoac tru (thut le 2 dau cach dep mat)
         if (line.trim().startsWith("+")) {
-            return "§2" + line;
+            return "  §a" + line.trim();
         }
         if (line.trim().startsWith("-")) {
-            return "§c" + line;
+            return "  §c" + line.trim();
         }
 
         // 5. Hieu ung dac biet hoac Set Bonus
         if (line.startsWith("Set Bonus:")) {
             if (line.contains("Permanent Fire Resistance")) {
-                return "§6§lSet Bonus: §ePermanent Fire Resistance";
+                return "  §6✦ §ePermanent Fire Resistance";
             }
             if (line.contains("Passive Vitality")) {
-                return "§6§lSet Bonus: §aPassive Vitality (Slow Health & Hunger Recovery)";
+                return "  §6✦ §aPassive Vitality §7(Health & Hunger Regen)";
             }
             if (line.contains("Emergency Recovery")) {
-                return "§6§lSet Bonus: §bEmergency Recovery (<30% HP: Res I + Regen II)";
+                return "  §6✦ §bEmergency Recovery §7(<30% HP: Res I + Regen II)";
             }
-            return "§6§l" + line;
+            return "  §6✦ §e" + line;
         }
         if (line.startsWith("Special:")) {
-            return "§6" + line;
+            return "  §6✦ §e" + line;
         }
         if (line.startsWith("Passive:")) {
-            return "§a" + line;
+            return "  §a✦ §f" + line;
         }
         if (line.startsWith("Debuff:")) {
-            return "§4" + line;
+            return "  §4✦ §c" + line;
         }
 
-        // 6. Ben vinh cuu hoac Chống cháy
+        // 6. Ben vinh cuu hoac Chong chay
         if (line.contains("Unbreakable") || line.contains("Fireproof")) {
-            return "§d" + line;
+            return "§d✦ " + line;
         }
 
         // 7. Thong tin reforge va Pity
         if (line.startsWith("Reforged:")) {
             if (line.contains("Guaranteed")) {
-                return "§a§l" + line;
+                return "§a§l✦ " + line;
             }
             if (line.contains("Max Quality")) {
-                return "§6" + line;
+                return "§8✦ " + line;
             }
-            return "§e" + line;
+            return "§e✦ " + line;
         }
 
         return "§7" + line;

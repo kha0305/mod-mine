@@ -217,16 +217,21 @@ public final class FabricServerItemManager {
 
         net.minecraft.world.item.component.ItemAttributeModifiers.Builder builder = net.minecraft.world.item.component.ItemAttributeModifiers.builder();
 
-        // Giu lai tat ca modifier goc khong thuoc namespace "minequality"
+        // 1. Giu lai tat ca modifier goc cua Vanilla nhung an khoi Tooltip mac dinh de tranh bi trung lap xau xi
         for (net.minecraft.world.item.component.ItemAttributeModifiers.Entry entry : baseModifiers.modifiers()) {
             if (entry != null && entry.modifier() != null && entry.modifier().id() != null) {
                 if (!"minequality".equals(entry.modifier().id().getNamespace())) {
-                    builder.add(entry.attribute(), entry.modifier(), entry.slot(), entry.display());
+                    builder.add(
+                            entry.attribute(),
+                            entry.modifier(),
+                            entry.slot(),
+                            net.minecraft.world.item.component.ItemAttributeModifiers.Display.hidden()
+                    );
                 }
             }
         }
 
-        // Gan chi so Mau toi da (Max Health) nguyen ban
+        // 2. Gan chi so Mau toi da (Max Health) nguyen ban voi Display.hidden() (Mod tu render Tooltip dep)
         if (stats.healthBonus() != 0) {
             builder.add(
                     net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH,
@@ -235,11 +240,12 @@ public final class FabricServerItemManager {
                             stats.healthBonus(),
                             net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE
                     ),
-                    slotGroup
+                    slotGroup,
+                    net.minecraft.world.item.component.ItemAttributeModifiers.Display.hidden()
             );
         }
 
-        // Gan chi so Giap cong them (Armor)
+        // 3. Gan chi so Giap cong them (Armor)
         if (stats.armorBonus() != 0) {
             builder.add(
                     net.minecraft.world.entity.ai.attributes.Attributes.ARMOR,
@@ -248,11 +254,12 @@ public final class FabricServerItemManager {
                             stats.armorBonus(),
                             net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE
                     ),
-                    slotGroup
+                    slotGroup,
+                    net.minecraft.world.item.component.ItemAttributeModifiers.Display.hidden()
             );
         }
 
-        // Gan chi so Do cung giap (Armor Toughness)
+        // 4. Gan chi so Do cung giap (Armor Toughness)
         if (stats.toughnessBonus() != 0) {
             builder.add(
                     net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS,
@@ -261,11 +268,12 @@ public final class FabricServerItemManager {
                             stats.toughnessBonus(),
                             net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE
                     ),
-                    slotGroup
+                    slotGroup,
+                    net.minecraft.world.item.component.ItemAttributeModifiers.Display.hidden()
             );
         }
 
-        // Gan chi so Khang day lui (Knockback Resistance)
+        // 5. Gan chi so Khang day lui (Knockback Resistance)
         if (stats.knockbackResistanceBonus() != 0) {
             builder.add(
                     net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE,
@@ -274,7 +282,8 @@ public final class FabricServerItemManager {
                             stats.knockbackResistanceBonus(),
                             net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE
                     ),
-                    slotGroup
+                    slotGroup,
+                    net.minecraft.world.item.component.ItemAttributeModifiers.Display.hidden()
             );
         }
 
@@ -346,22 +355,32 @@ public final class FabricServerItemManager {
                     net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE, 40, 0, true, false, true
             ));
 
-            // 2. Tu hoi phuc thu dong moi 60 ticks (3 giay): Hoi 1 mau va nạp 1 diem thanh doi
-            if (currentTick % 60 == 0) {
-                // Hoi mau thu dong neu chua day
-                if (player.getHealth() < player.getMaxHealth() && player.getHealth() > 0.0f) {
-                    player.heal(1.0f);
+            float health = player.getHealth();
+            float maxHealth = player.getMaxHealth();
+
+            // 2. Tu hoi phuc thu dong toc do cao (Passive Vitality) & Nap thanh doi moi giay (20 ticks):
+            if (currentTick % 20 == 0) {
+                // Hoi mau thu dong 2.0 HP (1 qua tim day) moi giay neu mau chua day
+                if (health < maxHealth && health > 0.0f) {
+                    player.heal(2.0f);
                 }
-                // Tu dong nap thanh doi va do bao hoa neu can
+                // Tu dong nap thanh doi va do bao hoa len toi da
                 net.minecraft.world.food.FoodData foodData = player.getFoodData();
                 if (foodData != null && (foodData.needsFood() || foodData.getFoodLevel() < 20)) {
-                    foodData.eat(1, 0.5f);
+                    foodData.eat(1, 1.0f);
                 }
             }
 
-            // 3. Cuu sinh khan cap khi mau < 30%
-            float health = player.getHealth();
-            float maxHealth = player.getMaxHealth();
+            // 3. Khac phuc triet de loi tim rong (Instant Health Fill):
+            // Neu nguoi choi vua mac giap khien Max Health tang len 40 HP nhung mau con thap (tim den),
+            // cap ngay REGENERATION II de bom day 2 hang tim trong tich tac!
+            if (health < maxHealth && health > 0.0f) {
+                player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                        net.minecraft.world.effect.MobEffects.REGENERATION, 40, 1, true, false, false
+                ));
+            }
+
+            // 4. Cuu sinh khan cap khi mau < 30%
             if (health > 0.0f && (health / maxHealth) < 0.30f) {
                 if (currentTick - lastEmergencyTick >= 1200 || lastEmergencyTick < 0) {
                     lastEmergencyTick = currentTick;
@@ -369,7 +388,7 @@ public final class FabricServerItemManager {
                             net.minecraft.world.effect.MobEffects.RESISTANCE, 160, 0, false, true, true
                     ));
                     player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                            net.minecraft.world.effect.MobEffects.REGENERATION, 160, 1, false, true, true
+                            net.minecraft.world.effect.MobEffects.REGENERATION, 160, 2, false, true, true
                     ));
                 }
             }

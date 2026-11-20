@@ -35,37 +35,37 @@ public final class QualityTooltipBuilder {
         QualityTier tier = (data.tier() != null) ? data.tier() : QualityTier.COMMON;
         QualityModifier.EquipmentCategory effectiveCategory = (category != null) ? category : QualityModifier.EquipmentCategory.OTHER;
 
-        // 1. Dòng Phẩm chất (Quality: <TierName>)
-        lines.add(String.format("Quality: %s", capitalize(tier.getId())));
+        String divider = "§8§m────────────────────────────";
 
-        // 2. Dòng Gắn bó (Item Affinity: 100/100 (Kindred Spirits - Max Luck))
+        // 1. Phân khu Phẩm chất & Độ gắn bó
+        lines.add(divider);
+        lines.add(String.format("Quality: %s", capitalize(tier.getId())));
         lines.add(ItemAffinity.formatTooltip(data.affinity()));
 
-        // 3. Chỉ số thuộc tính khi trang bị (Equipment Modifiers)
+        // 2. Phân khu Chỉ số thuộc tính khi trang bị (Equipment Modifiers)
         QualityModifier.ModifierStats stats = QualityModifier.getStats(tier, effectiveCategory);
         List<String> statLines = formatModifierStats(stats, effectiveCategory, itemId);
         if (!statLines.isEmpty()) {
-            lines.add("");
+            lines.add(divider);
             lines.add(getSlotHeader(effectiveCategory));
             lines.addAll(statLines);
         }
 
-        // 4. Hiệu ứng đặc biệt (Special Effects & Set Bonuses)
+        // 3. Phân khu Hiệu ứng đặc biệt (Special Effects & Set Bonuses)
         List<String> effectLines = formatSpecialEffects(tier, effectiveCategory, itemId);
         if (!effectLines.isEmpty()) {
-            lines.add("");
+            lines.add(divider);
             lines.addAll(effectLines);
         }
 
-        // 5. Cờ Bền Vĩnh Cửu & Chống Cháy (Unbreakable & Fireproof)
+        // 4. Phân khu Đặc tính Bền Vĩnh Cửu, Chống Cháy & Rèn Lại
         String flagsLine = formatFlags(data.fireproof(), data.unbreakable());
+        lines.add(divider);
         if (flagsLine != null) {
-            lines.add("");
             lines.add(flagsLine);
         }
-
-        // 6. Số lần rèn (Reforged: X times)
         lines.add(formatReforgedInfo(data.reforgeCount(), tier));
+        lines.add(divider);
 
         return lines;
     }
