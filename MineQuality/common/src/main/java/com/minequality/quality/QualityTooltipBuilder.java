@@ -181,7 +181,8 @@ public final class QualityTooltipBuilder {
         if (tier == QualityTier.LEGENDARY) {
             if (isArmor(category)) {
                 list.add("Set Bonus: Permanent Fire Resistance");
-                list.add("Set Bonus: Emergency Recovery (<30% HP: Res I + Regen I)");
+                list.add("Set Bonus: Passive Vitality (Slow Health & Hunger Recovery)");
+                list.add("Set Bonus: Emergency Recovery (<30% HP: Res I + Regen II)");
             } else if (category == QualityModifier.EquipmentCategory.MELEE_WEAPON && !normalized.contains("mace") && !normalized.contains("trident")) {
                 list.add("Special: 20% Lifesteal on Hit");
             } else if (category == QualityModifier.EquipmentCategory.MINING_TOOL) {

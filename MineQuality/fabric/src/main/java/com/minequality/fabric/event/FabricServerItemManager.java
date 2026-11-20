@@ -156,6 +156,7 @@ public final class FabricServerItemManager {
      * Gan truc tiep cac thanh phan goc cua Minecraft 26.3 vao ItemStack:
      * - Unbreakable: Khoa do ben vinh cuu, tu dong hoi phuc do ben neu da bi sut me.
      * - DamageResistant: Chong chiu 100% sat thuong lua va dung nham y het Netherite.
+     * - AttributeModifiers: Gan truc tiep chi so Mau toi da (Max Health), Giap, Do cung giap, Khang day lui goc.
      */
     public static void applyNativeComponents(net.minecraft.world.item.ItemStack stack, ItemQualityData data) {
         if (stack == null || stack.isEmpty() || data == null) {
@@ -172,7 +173,7 @@ public final class FabricServerItemManager {
                 stack.remove(net.minecraft.core.component.DataComponents.UNBREAKABLE);
             }
 
-            // 2. Xu ly Chống Cháy (DamageResistant - Fire & Lava immune)
+            // 2. Xu ly Chong Chay (DamageResistant - Fire & Lava immune)
             if (data.fireproof()) {
                 net.minecraft.world.item.component.DamageResistant fireResistant =
                         net.minecraft.world.item.Items.NETHERITE_INGOT.components().get(net.minecraft.core.component.DataComponents.DAMAGE_RESISTANT);
@@ -180,8 +181,104 @@ public final class FabricServerItemManager {
                     stack.set(net.minecraft.core.component.DataComponents.DAMAGE_RESISTANT, fireResistant);
                 }
             }
+
+            // 3. Xu ly Thuoc tinh nguyen ban (AttributeModifiers: Max Health, Armor, Toughness, Knockback)
+            net.minecraft.resources.Identifier id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem());
+            if (id != null) {
+                String itemId = id.toString();
+                QualityModifier.EquipmentCategory category = QualityItemFilter.getCategory(itemId);
+                applyAttributeModifiers(stack, data, category);
+            }
         } catch (Throwable ignored) {
         }
+    }
+
+    private static void applyAttributeModifiers(net.minecraft.world.item.ItemStack stack, ItemQualityData data, QualityModifier.EquipmentCategory category) {
+        net.minecraft.world.entity.EquipmentSlotGroup slotGroup = switch (category) {
+            case ARMOR_HELMET -> net.minecraft.world.entity.EquipmentSlotGroup.HEAD;
+            case ARMOR_CHESTPLATE -> net.minecraft.world.entity.EquipmentSlotGroup.CHEST;
+            case ARMOR_LEGGINGS -> net.minecraft.world.entity.EquipmentSlotGroup.LEGS;
+            case ARMOR_BOOTS -> net.minecraft.world.entity.EquipmentSlotGroup.FEET;
+            default -> null;
+        };
+        if (slotGroup == null) {
+            return;
+        }
+
+        QualityModifier.ModifierStats stats = QualityModifier.getStats(data.tier(), category);
+
+        net.minecraft.world.item.component.ItemAttributeModifiers baseModifiers = stack.get(net.minecraft.core.component.DataComponents.ATTRIBUTE_MODIFIERS);
+        if (baseModifiers == null) {
+            baseModifiers = stack.getItem().components().get(net.minecraft.core.component.DataComponents.ATTRIBUTE_MODIFIERS);
+        }
+        if (baseModifiers == null) {
+            baseModifiers = net.minecraft.world.item.component.ItemAttributeModifiers.EMPTY;
+        }
+
+        net.minecraft.world.item.component.ItemAttributeModifiers.Builder builder = net.minecraft.world.item.component.ItemAttributeModifiers.builder();
+
+        // Giu lai tat ca modifier goc khong thuoc namespace "minequality"
+        for (net.minecraft.world.item.component.ItemAttributeModifiers.Entry entry : baseModifiers.modifiers()) {
+            if (entry != null && entry.modifier() != null && entry.modifier().id() != null) {
+                if (!"minequality".equals(entry.modifier().id().getNamespace())) {
+                    builder.add(entry.attribute(), entry.modifier(), entry.slot(), entry.display());
+                }
+            }
+        }
+
+        // Gan chi so Mau toi da (Max Health) nguyen ban
+        if (stats.healthBonus() != 0) {
+            builder.add(
+                    net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH,
+                    new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                            net.minecraft.resources.Identifier.fromNamespaceAndPath("minequality", "quality_health_bonus"),
+                            stats.healthBonus(),
+                            net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE
+                    ),
+                    slotGroup
+            );
+        }
+
+        // Gan chi so Giap cong them (Armor)
+        if (stats.armorBonus() != 0) {
+            builder.add(
+                    net.minecraft.world.entity.ai.attributes.Attributes.ARMOR,
+                    new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                            net.minecraft.resources.Identifier.fromNamespaceAndPath("minequality", "quality_armor_bonus"),
+                            stats.armorBonus(),
+                            net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE
+                    ),
+                    slotGroup
+            );
+        }
+
+        // Gan chi so Do cung giap (Armor Toughness)
+        if (stats.toughnessBonus() != 0) {
+            builder.add(
+                    net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS,
+                    new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                            net.minecraft.resources.Identifier.fromNamespaceAndPath("minequality", "quality_toughness_bonus"),
+                            stats.toughnessBonus(),
+                            net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE
+                    ),
+                    slotGroup
+            );
+        }
+
+        // Gan chi so Khang day lui (Knockback Resistance)
+        if (stats.knockbackResistanceBonus() != 0) {
+            builder.add(
+                    net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE,
+                    new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                            net.minecraft.resources.Identifier.fromNamespaceAndPath("minequality", "quality_knockback_bonus"),
+                            stats.knockbackResistanceBonus(),
+                            net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE
+                    ),
+                    slotGroup
+            );
+        }
+
+        stack.set(net.minecraft.core.component.DataComponents.ATTRIBUTE_MODIFIERS, builder.build());
     }
 
     /**
@@ -244,22 +341,35 @@ public final class FabricServerItemManager {
             legsData != null && legsData.tier() == QualityTier.LEGENDARY &&
             feetData != null && feetData.tier() == QualityTier.LEGENDARY) {
 
-            // Khang lua vinh cuu
+            // 1. Khang lua vinh cuu
             player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
                     net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE, 40, 0, true, false, true
             ));
 
-            // Cuu sinh khan cap khi mau < 30%
+            // 2. Tu hoi phuc thu dong moi 60 ticks (3 giay): Hoi 1 mau va nạp 1 diem thanh doi
+            if (currentTick % 60 == 0) {
+                // Hoi mau thu dong neu chua day
+                if (player.getHealth() < player.getMaxHealth() && player.getHealth() > 0.0f) {
+                    player.heal(1.0f);
+                }
+                // Tu dong nap thanh doi va do bao hoa neu can
+                net.minecraft.world.food.FoodData foodData = player.getFoodData();
+                if (foodData != null && (foodData.needsFood() || foodData.getFoodLevel() < 20)) {
+                    foodData.eat(1, 0.5f);
+                }
+            }
+
+            // 3. Cuu sinh khan cap khi mau < 30%
             float health = player.getHealth();
             float maxHealth = player.getMaxHealth();
             if (health > 0.0f && (health / maxHealth) < 0.30f) {
-                if (currentTick - lastEmergencyTick >= 6000 || lastEmergencyTick < 0) {
+                if (currentTick - lastEmergencyTick >= 1200 || lastEmergencyTick < 0) {
                     lastEmergencyTick = currentTick;
                     player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                            net.minecraft.world.effect.MobEffects.RESISTANCE, 120, 0, false, true, true
+                            net.minecraft.world.effect.MobEffects.RESISTANCE, 160, 0, false, true, true
                     ));
                     player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                            net.minecraft.world.effect.MobEffects.REGENERATION, 120, 0, false, true, true
+                            net.minecraft.world.effect.MobEffects.REGENERATION, 160, 1, false, true, true
                     ));
                 }
             }

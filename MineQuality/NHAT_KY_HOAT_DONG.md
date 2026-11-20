@@ -368,3 +368,30 @@ Theo dõi chi tiết tiến độ phát triển, thay đổi mã nguồn và cá
 - Toàn bộ 5.699 assertions kiểm thử tự động vượt qua 100%.
 - Đã đóng gói tệp JAR mới mod_mine-fabric-0.1.0.jar (135.557 bytes) và triển khai vào thư mục mods của Prism Launcher:
   C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\mod_mine-fabric-0.1.0.jar.
+
+---
+
+## [2026-11-20] - Tích Hợp Native AttributeModifiers (Max Health 40 HP), Tự Hồi Máu & Đói Thụ Động, Nâng Cấp Tooltip Đẹp
+
+### 1. Mục tiêu kỹ thuật
+- Tích hợp trực tiếp các thuộc tính nguyên bản của Minecraft qua DataComponents.ATTRIBUTE_MODIFIERS cho toàn bộ giáp:
+  + Mũ: +4 Max Health (+2 Hearts), +1.5 Armor, +2.0 Toughness, +5% Knockback.
+  + Áo: +6 Max Health (+3 Hearts), +2.0 Armor, +2.0 Toughness, +5% Knockback.
+  + Quần: +6 Max Health (+3 Hearts), +2.0 Armor, +2.0 Toughness, +5% Knockback.
+  + Giày: +4 Max Health (+2 Hearts), +1.5 Armor, +2.0 Toughness, +5% Knockback.
+  -> Tổng cả 4 món cộng đúng +20 HP, nâng thanh máu người chơi lên chuẩn mốc 40 HP (2 hàng tim hoàn chỉnh).
+- Triển khai cơ chế Hồi phục Phương án 2 và Tự hồi thanh đói (Passive Vitality):
+  + Khi mặc đủ 4 món giáp Huyền thoại: duy trì Kháng lửa vĩnh cửu.
+  + Cứ mỗi 3 giây (60 ticks): tự hồi phục nhẹ 1 HP nếu máu chưa đầy, đồng thời tự động nạp 1 điểm thanh đói và độ bão hòa (foodData.eat(1, 0.5f)).
+  + Khi máu tụt dưới 30%: kích hoạt ngay Cứu sinh khẩn cấp (Kháng cự I + Hồi máu II trong 8 giây, hồi chiêu 60 giây).
+- Nâng cấp thẩm mỹ Tooltip Set Bonus: phân cấp màu sắc rực rỡ và chuyên nghiệp cho từng dòng hiệu ứng.
+
+### 2. Danh sách tệp đã chỉnh sửa
+- [FabricServerItemManager.java](file:///D:/tool/mod-mine/MineQuality/fabric/src/main/java/com/minequality/fabric/event/FabricServerItemManager.java): Triển khai applyAttributeModifiers và cập nhật vòng lặp ServerTick với Passive Vitality.
+- [QualityTooltipBuilder.java](file:///D:/tool/mod-mine/MineQuality/common/src/main/java/com/minequality/quality/QualityTooltipBuilder.java): Bổ sung dòng Passive Vitality vào Set Bonus.
+- [FabricTooltipHandler.java](file:///D:/tool/mod-mine/MineQuality/fabric/src/main/java/com/minequality/fabric/event/FabricTooltipHandler.java): Tinh chỉnh bảng màu hiển thị Tooltip đẳng cấp.
+- [NHAT_KY_HOAT_DONG.md](file:///D:/tool/mod-mine/MineQuality/NHAT_KY_HOAT_DONG.md): Ghi nhận nhật ký tính năng.
+
+### 3. Kết quả kiểm tra
+- 5.699 assertions kiểm thử tự động đạt 100%.
+- Tệp JAR mới mod_mine-fabric-0.1.0.jar (138.116 bytes) đã triển khai trực tiếp vào Prism Launcher.

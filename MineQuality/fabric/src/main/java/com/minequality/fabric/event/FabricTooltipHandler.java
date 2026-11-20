@@ -165,7 +165,19 @@ public final class FabricTooltipHandler {
         }
 
         // 5. Hieu ung dac biet hoac Set Bonus
-        if (line.startsWith("Special:") || line.startsWith("Set Bonus:")) {
+        if (line.startsWith("Set Bonus:")) {
+            if (line.contains("Permanent Fire Resistance")) {
+                return "§6§lSet Bonus: §ePermanent Fire Resistance";
+            }
+            if (line.contains("Passive Vitality")) {
+                return "§6§lSet Bonus: §aPassive Vitality (Slow Health & Hunger Recovery)";
+            }
+            if (line.contains("Emergency Recovery")) {
+                return "§6§lSet Bonus: §bEmergency Recovery (<30% HP: Res I + Regen II)";
+            }
+            return "§6§l" + line;
+        }
+        if (line.startsWith("Special:")) {
             return "§6" + line;
         }
         if (line.startsWith("Passive:")) {
