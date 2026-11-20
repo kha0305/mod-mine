@@ -1,14 +1,17 @@
 modLoader = "javafml"
 loaderVersion = "[1,)"
 license = "MIT"
+issueTrackerURL = "https://github.com/example/mod-mine/issues"
 
 [[mods]]
 modId = "mod_mine"
 version = "0.1.0"
 displayName = "MineQuality"
+updateJSONURL = "https://raw.githubusercontent.com/example/mod-mine/master/update.json"
+displayURL = "https://github.com/example/mod-mine"
 authors = "MineCraftsman"
 description = '''
-Mod QoL bo sung pham chat ngau nhien khi che tao trang bi tren Minecraft 26.3.
+Mod QoL bo sung pham chat ngau nhien khi che tao trang bi tren Minecraft 26.3 ho tro day du tinh nang tren NeoForge Loader.
 '''
 
 [[dependencies.mod_mine]]

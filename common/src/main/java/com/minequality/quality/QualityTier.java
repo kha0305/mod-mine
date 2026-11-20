@@ -4,7 +4,7 @@ package com.minequality.quality;
  * Định nghĩa các bậc phẩm chất của vật phẩm trang bị trong game.
  */
 public enum QualityTier {
-    AWFUL("awful", "quality.mod_mine.tier.awful", 0xAAAAAA, 15),       // Màu xám - Phế phẩm (15%)
+    JUNK("junk", "quality.mod_mine.tier.junk", 0xAAAAAA, 15),           // Màu xám - Phế phẩm (15%)
     COMMON("common", "quality.mod_mine.tier.common", 0xFFFFFF, 45),     // Màu trắng - Phổ thông (45%)
     UNCOMMON("uncommon", "quality.mod_mine.tier.uncommon", 0x55FF55, 22), // Màu xanh lá - Bền chắc (22%)
     RARE("rare", "quality.mod_mine.tier.rare", 0x55FFFF, 12),           // Màu xanh ngọc/lam - Hiếm (12%)

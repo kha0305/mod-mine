@@ -1,6 +1,11 @@
 {
   "mod_mine.name": "MineQuality",
-  "quality.mod_mine.tier.awful": "Phế phẩm",
+  "quality.mod_mine.tier.junk": "Phế phẩm",
+  "quality.mod_mine.affinity.stranger": "Xa lạ",
+  "quality.mod_mine.affinity.acquaintance": "Quen thuộc",
+  "quality.mod_mine.affinity.trusted_companion": "Bạn đồng hành",
+  "quality.mod_mine.affinity.soulbound": "Gắn kết linh hồn",
+  "quality.mod_mine.affinity.kindred_spirits": "Tâm đầu ý hợp",
   "quality.mod_mine.tier.common": "Phổ thông",
   "quality.mod_mine.tier.uncommon": "Bền chắc",
   "quality.mod_mine.tier.rare": "Hiếm",

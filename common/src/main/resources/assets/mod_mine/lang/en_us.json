@@ -1,6 +1,11 @@
 {
   "mod_mine.name": "MineQuality",
-  "quality.mod_mine.tier.awful": "Awful",
+  "quality.mod_mine.tier.junk": "Junk",
+  "quality.mod_mine.affinity.stranger": "Stranger",
+  "quality.mod_mine.affinity.acquaintance": "Acquaintance",
+  "quality.mod_mine.affinity.trusted_companion": "Trusted Companion",
+  "quality.mod_mine.affinity.soulbound": "Soulbound",
+  "quality.mod_mine.affinity.kindred_spirits": "Kindred Spirits",
   "quality.mod_mine.tier.common": "Common",
   "quality.mod_mine.tier.uncommon": "Uncommon",
   "quality.mod_mine.tier.rare": "Rare",

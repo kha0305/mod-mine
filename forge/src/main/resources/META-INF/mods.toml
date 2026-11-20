@@ -1,0 +1,26 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "MIT"
+
+[[mods]]
+modId = "mod_mine"
+version = "0.1.0"
+displayName = "MineQuality"
+authors = "MineCraftsman"
+description = '''
+Mod QoL bo sung pham chat ngau nhien khi che tao trang bi tren Minecraft 26.3 su dung MinecraftForge Loader.
+'''
+
+[[dependencies.mod_mine]]
+modId = "forge"
+type = "required"
+versionRange = "[26.3.0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.mod_mine]]
+modId = "minecraft"
+type = "required"
+versionRange = "[26.3,)"
+ordering = "NONE"
+side = "BOTH"
