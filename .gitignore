@@ -1,0 +1,35 @@
+# Gradle va Thu muc sinh ra khi bien dich
+.gradle/
+build/
+out/
+bin/
+*/build/
+*/out/
+*/bin/
+
+# Loom & ModDevGradle Cache
+.loom-cache/
+run/
+*/run/
+
+# Cau hinh IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.vscode/
+
+# Nhat ky va Tep tam
+*.log
+*.tmp
+*~
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Java Crash Log
+hs_err_pid*
+replay_pid*

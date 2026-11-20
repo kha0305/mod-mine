@@ -1,0 +1,11 @@
+{
+  "mod_mine.name": "MineQuality",
+  "quality.mod_mine.tier.awful": "Awful",
+  "quality.mod_mine.tier.common": "Common",
+  "quality.mod_mine.tier.uncommon": "Uncommon",
+  "quality.mod_mine.tier.rare": "Rare",
+  "quality.mod_mine.tier.epic": "Epic",
+  "quality.mod_mine.tier.legendary": "Legendary",
+  "tooltip.mod_mine.quality_label": "Quality: %s",
+  "tooltip.mod_mine.reforge_hint": "Can be reforged with its base material at an Anvil"
+}

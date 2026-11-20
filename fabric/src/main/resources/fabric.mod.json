@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "mod_mine",
+  "version": "0.1.0",
+  "name": "MineQuality",
+  "description": "Mod QoL bo sung pham chat ngau nhien khi che tao trang bi.",
+  "authors": [
+    "MineCraftsman"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.minequality.fabric.MineQualityFabric"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.0",
+    "minecraft": ">=26.3",
+    "java": ">=26"
+  }
+}

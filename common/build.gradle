@@ -1,0 +1,8 @@
+plugins {
+    id "java-library"
+}
+
+dependencies {
+    // Các thư viện tiện ích JSON và annotation dùng chung
+    compileOnly "org.jetbrains:annotations:24.1.0"
+}

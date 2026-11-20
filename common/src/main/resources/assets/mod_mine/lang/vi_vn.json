@@ -1,0 +1,11 @@
+{
+  "mod_mine.name": "MineQuality",
+  "quality.mod_mine.tier.awful": "Phế phẩm",
+  "quality.mod_mine.tier.common": "Phổ thông",
+  "quality.mod_mine.tier.uncommon": "Bền chắc",
+  "quality.mod_mine.tier.rare": "Hiếm",
+  "quality.mod_mine.tier.epic": "Sử thi",
+  "quality.mod_mine.tier.legendary": "Huyền thoại",
+  "tooltip.mod_mine.quality_label": "Phẩm chất: %s",
+  "tooltip.mod_mine.reforge_hint": "Có thể rèn lại bằng nguyên liệu gốc tại Đe"
+}
