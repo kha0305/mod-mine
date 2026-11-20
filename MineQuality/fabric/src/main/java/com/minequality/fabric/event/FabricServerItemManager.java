@@ -205,6 +205,14 @@ public final class FabricServerItemManager {
             return;
         }
 
+        String slotPrefix = switch (category) {
+            case ARMOR_HELMET -> "head_";
+            case ARMOR_CHESTPLATE -> "chest_";
+            case ARMOR_LEGGINGS -> "legs_";
+            case ARMOR_BOOTS -> "feet_";
+            default -> "generic_";
+        };
+
         QualityModifier.ModifierStats stats = QualityModifier.getStats(data.tier(), category);
 
         net.minecraft.world.item.component.ItemAttributeModifiers baseModifiers = stack.get(net.minecraft.core.component.DataComponents.ATTRIBUTE_MODIFIERS);
@@ -231,12 +239,12 @@ public final class FabricServerItemManager {
             }
         }
 
-        // 2. Gan chi so Mau toi da (Max Health) nguyen ban voi Display.hidden() (Mod tu render Tooltip dep)
+        // 2. Gan chi so Mau toi da (Max Health) nguyen ban voi Display.hidden() (Identifier rieng cho tung vi tri giap)
         if (stats.healthBonus() != 0) {
             builder.add(
                     net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH,
                     new net.minecraft.world.entity.ai.attributes.AttributeModifier(
-                            net.minecraft.resources.Identifier.fromNamespaceAndPath("minequality", "quality_health_bonus"),
+                            net.minecraft.resources.Identifier.fromNamespaceAndPath("minequality", "quality_" + slotPrefix + "health_bonus"),
                             stats.healthBonus(),
                             net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE
                     ),
@@ -250,7 +258,7 @@ public final class FabricServerItemManager {
             builder.add(
                     net.minecraft.world.entity.ai.attributes.Attributes.ARMOR,
                     new net.minecraft.world.entity.ai.attributes.AttributeModifier(
-                            net.minecraft.resources.Identifier.fromNamespaceAndPath("minequality", "quality_armor_bonus"),
+                            net.minecraft.resources.Identifier.fromNamespaceAndPath("minequality", "quality_" + slotPrefix + "armor_bonus"),
                             stats.armorBonus(),
                             net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE
                     ),
@@ -264,7 +272,7 @@ public final class FabricServerItemManager {
             builder.add(
                     net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS,
                     new net.minecraft.world.entity.ai.attributes.AttributeModifier(
-                            net.minecraft.resources.Identifier.fromNamespaceAndPath("minequality", "quality_toughness_bonus"),
+                            net.minecraft.resources.Identifier.fromNamespaceAndPath("minequality", "quality_" + slotPrefix + "toughness_bonus"),
                             stats.toughnessBonus(),
                             net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE
                     ),
@@ -278,7 +286,7 @@ public final class FabricServerItemManager {
             builder.add(
                     net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE,
                     new net.minecraft.world.entity.ai.attributes.AttributeModifier(
-                            net.minecraft.resources.Identifier.fromNamespaceAndPath("minequality", "quality_knockback_bonus"),
+                            net.minecraft.resources.Identifier.fromNamespaceAndPath("minequality", "quality_" + slotPrefix + "knockback_bonus"),
                             stats.knockbackResistanceBonus(),
                             net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE
                     ),
