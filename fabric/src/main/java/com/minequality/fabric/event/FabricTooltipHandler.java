@@ -75,8 +75,12 @@ public final class FabricTooltipHandler {
             return;
         }
 
-        ItemQualityData qualityData = getOrRollQualityData(stack);
+        ItemQualityData qualityData = readQualityDataOnly(stack);
+        int insertIndex = Math.min(1, lines.size());
         if (qualityData == null) {
+            // Vat pham chua duoc Server gan pham chat (dang trong o che tao ResultSlot hoac preview)
+            // AN PHAM CHAT: Hien thi "Quality: ??? (Craft to reveal)"
+            lines.add(insertIndex, net.minecraft.network.chat.Component.literal("§7§oQuality: ??? (Craft to reveal)"));
             return;
         }
 
@@ -85,7 +89,6 @@ public final class FabricTooltipHandler {
             return;
         }
 
-        int insertIndex = Math.min(1, lines.size());
         for (String raw : rawLines) {
             if (raw.isEmpty()) {
                 lines.add(insertIndex++, net.minecraft.network.chat.Component.empty());
@@ -97,9 +100,13 @@ public final class FabricTooltipHandler {
     }
 
     /**
-     * Doc du lieu pham chat tu ItemStack; neu chua co thi tu dong boc tham va luu vao CustomData.
+     * Doc du lieu pham chat tu ItemStack (Che do Read-Only an toan tu Client).
+     * Tuyet doi khong tu y random tren Client de tranh bi thay doi pham chat khi dong bo.
      */
-    private static ItemQualityData getOrRollQualityData(net.minecraft.world.item.ItemStack stack) {
+    public static ItemQualityData readQualityDataOnly(net.minecraft.world.item.ItemStack stack) {
+        if (stack == null || stack.isEmpty()) {
+            return null;
+        }
         try {
             net.minecraft.world.item.component.CustomData customData = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
             if (customData != null) {
@@ -120,27 +127,9 @@ public final class FabricTooltipHandler {
                     return new ItemQualityData(tier, affinity, reforgeCount, fireproof, unbreakable);
                 }
             }
-
-            // Neu vat pham chua co pham chat: Tu dong boc tham pham chat ngau nhien
-            ItemQualityData rolled = ItemQualityData.of(QualityManager.rollQuality());
-            final ItemQualityData finalRolled = rolled;
-            try {
-                net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, stack, tag -> {
-                    net.minecraft.nbt.CompoundTag qTag = new net.minecraft.nbt.CompoundTag();
-                    qTag.putString("tier", finalRolled.tier().name());
-                    qTag.putInt("affinity", finalRolled.affinity());
-                    qTag.putInt("reforge_count", finalRolled.reforgeCount());
-                    qTag.putBoolean("fireproof", finalRolled.fireproof());
-                    qTag.putBoolean("unbreakable", finalRolled.unbreakable());
-                    tag.put("minequality", qTag);
-                });
-            } catch (Throwable ignored) {
-                // Truong hop ItemStack bat bien o client
-            }
-            return rolled;
-        } catch (Throwable ex) {
-            return ItemQualityData.of(QualityManager.rollQuality());
+        } catch (Throwable ignored) {
         }
+        return null;
     }
 
     /**

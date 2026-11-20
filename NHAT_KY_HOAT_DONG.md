@@ -258,3 +258,27 @@ Theo dõi chi tiết tiến độ phát triển, thay đổi mã nguồn và cá
 - Chạy thành công toàn bộ 5.699 assertions trong `FabricQACheckTest` và `FabricIntegrationTest` (100% pass).
 - Đã đóng gói bản JAR đầy đủ (50.955 bytes) và triển khai thành công vào thư mục mods của Prism Launcher:
   `C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\mod_mine-fabric-0.1.0.jar`.
+
+
+---
+
+## [2026-11-20] - Xử Lý Lỗi Ẩn Phẩm Chất Ô Chế Tạo & Cố Định Phẩm Chất Phía Server (BUG-007)
+
+### 1. Mục tiêu kỹ thuật
+- Giải quyết triệt để vấn đề:
+  1. Ẩn phẩm chất ở ô xem trước kết quả chế tạo (Result Slot) trên bàn chế tạo để không bị lộ trước kết quả.
+  2. Ngăn chặn hiện tượng bốc thăm lại (re-roll) khi lấy vật phẩm ra khỏi bàn chế tạo.
+  3. Cố định vĩnh viễn phẩm chất của mọi trang bị trong túi đồ, không bị thay đổi ngẫu nhiên khi di chuyển hoặc đồng bộ.
+- Chuyển toàn bộ kiến trúc gán phẩm chất sang Server-Authoritative (`ServerTickEvents.END_SERVER_TICK`).
+- Chuyển Tooltip Client sang chế độ Read-Only hoàn toàn.
+
+### 2. Danh sách tệp đã chỉnh sửa/tạo mới
+- [FabricServerItemManager.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/event/FabricServerItemManager.java): Quản lý Server Tick, gán phẩm chất một lần duy nhất vào `DataComponents.CUSTOM_DATA`, loại trừ `ResultSlot`.
+- [MineQualityFabric.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/MineQualityFabric.java): Đăng ký `FabricServerItemManager.register()`.
+- [FabricTooltipHandler.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/event/FabricTooltipHandler.java): Chuyển sang `readQualityDataOnly`, hiển thị `Quality: ??? (Craft to reveal)` cho ô chế tạo.
+- [SO_TAY_KIEM_TRA_BUG.md](file:///D:/tool/mod-mine/SO_TAY_KIEM_TRA_BUG.md): Ghi nhận chi tiết lỗi và giải pháp BUG-007.
+
+### 3. Kết quả kiểm tra
+- Chạy thành công toàn bộ 5.699 assertions trong `FabricQACheckTest` và `FabricIntegrationTest` (100% pass).
+- Đã đóng gói bản JAR đầy đủ (53.464 bytes) và cập nhật trực tiếp vào thư mục mods của Prism Launcher:
+  `C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\mod_mine-fabric-0.1.0.jar`.

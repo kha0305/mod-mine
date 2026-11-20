@@ -97,3 +97,28 @@ Sổ tay theo dõi nguyên nhân gốc rễ và biện pháp phòng ngừa các 
 - Cách phòng ngừa:
   + Luôn tích hợp trực tiếp với API sự kiện thực tế của Loader (`ItemTooltipCallback` cho Fabric, `ItemTooltipEvent` cho NeoForge/Forge).
   + Thiết kế cơ chế On-Demand Roll phòng thủ để đảm bảo bất kỳ trang bị hợp lệ nào xuất hiện trên màn hình người chơi đều tự động sở hữu phẩm chất.
+
+
+---
+
+### [BUG-007] - Ô Chế Tạo Lộ Phẩm Chất & Phẩm Chất Bị Random Lại Liên Tục Khi Lấy Đồ / Đồng Bộ Túi Đồ
+- Thời gian: 2026-11-20
+- Hiện tượng lỗi:
+  + Khi xếp nguyên liệu trên bàn chế tạo, ô kết quả (Result Slot) không ẩn phẩm chất mà hiển thị lộ kết quả (ví dụ Junk).
+  + Khi người chơi click lấy cúp ra khỏi bàn chế tạo vào túi đồ, phẩm chất bị random lại thành một phẩm chất khác (từ Junk thành Uncommon).
+  + Toàn bộ các trang bị khác đang có trong túi đồ cũng bị random phẩm chất lung tung mỗi khi di chuyển hoặc đồng bộ.
+- Nguyên nhân gốc rễ (Root Cause):
+  + Tầng Client ([FabricTooltipHandler.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/event/FabricTooltipHandler.java)) trước đó tự ý gọi `QualityManager.rollQuality()` khi thấy thiếu thẻ `minequality`.
+  + Vật phẩm ở ô kết quả chế tạo chỉ là bản xem trước tạm thời (Preview ItemStack). Khi người chơi click lấy ra, Server gửi một `ItemStack` mới xuống Client, khiến Client tiếp tục bốc thăm lần 2.
+  + Do Client không thể lưu trữ bền vững lên Server, mỗi lần Server gửi gói tin đồng bộ vị trí slot, Client lại coi đó là vật phẩm mới và bốc thăm lại từ đầu, làm phẩm chất nhảy loạn xạ trên toàn bộ trang bị.
+- Cách khắc phục:
+  + Chuyển 100% quyền sinh và lưu trữ phẩm chất về phía Server (Server-Authoritative):
+    - Tạo mới [FabricServerItemManager.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/event/FabricServerItemManager.java) lắng nghe `ServerTickEvents.END_SERVER_TICK`.
+    - Server kiểm tra túi đồ (`player.getInventory()`) và con trỏ chuột (`containerMenu.getCarried()`): Bốc thăm duy nhất 1 lần khi trang bị hợp lệ chưa có thẻ `minequality`, lưu trực tiếp vào `DataComponents.CUSTOM_DATA`.
+    - Một khi đã có `minequality`, Server bảo lưu nguyên vẹn 100%, tuyệt đối không bao giờ roll lại.
+    - Loại trừ hoàn toàn ô kết quả chế tạo `ResultSlot` (`slot instanceof ResultSlot`), không bao giờ gán dữ liệu cho vật phẩm đang xem trước.
+  + Phía Client ([FabricTooltipHandler.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/event/FabricTooltipHandler.java)):
+    - Chuyển sang chế độ Read-Only hoàn toàn thông qua phương thức `readQualityDataOnly(stack)`. Tuyệt đối không tự ý bốc thăm ngẫu nhiên ở Client.
+    - Khi vật phẩm chưa có phẩm chất từ Server (đang ở ô kết quả chế tạo), hiển thị: `§7§oQuality: ??? (Craft to reveal)` và không hiển thị chỉ số để giấu kín phẩm chất trước khi lấy ra.
+- Cách phòng ngừa:
+  + Quy tắc bất di bất dịch trong lập trình Mod Multiplayer/Singleplayer Minecraft: *"Dữ liệu trạng thái trò chơi (Gameplay Data/State) bắt buộc phải do Server quản lý và ghi nhận; Client chỉ được phép đọc và hiển thị (Read-Only Rendering), tuyệt đối không được tự ý bốc thăm ngẫu nhiên ở tầng View/Tooltip."*
