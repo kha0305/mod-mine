@@ -163,3 +163,20 @@ Sá»• tay theo dÃµi nguyÃªn nhÃ¢n gá»‘c rá»… vÃ  biá»‡n phÃ¡p phÃ²ng ngá»«a cÃ¡c 
   + ÄÃ³ng gÃ³i láº¡i toÃ n bá»™ JAR (133.723 bytes) vÃ  triá»ƒn khai vÃ o thÆ° má»¥c mods cá»§a Prism Launcher.
 - CÃ¡ch phÃ²ng ngá»«a:
   + Khi can thiá»‡p cÃ¡c container GUI cÃ³ nhiá»u mod tÃ¹y biáº¿n (nhÆ° Äe, LÃ² rÃ¨n, RÆ°Æ¡ng), luÃ´n can thiá»‡p vÃ o lá»›p cha trá»«u tÆ°á»£ng cao nháº¥t (`ItemCombinerMenu`, `AbstractContainerMenu`) káº¿t há»£p Accessor Mixin Ä‘á»ƒ Ä‘áº£m báº£o kháº£ nÄƒng tÆ°Æ¡ng thÃ­ch xuyÃªn mod.
+
+
+---
+
+### [BUG-010] - Ngo?i L? InvalidMixinException Do Khai Báo @Shadow Method Thu?c L?p Cha
+- Th?i gian: 2026-11-20
+- Hi?n tu?ng l?i: Kh?i d?ng game b? d?ng ngay t?i giai do?n t?i Mixin Bootstrap v?i l?i:
+  `InvalidMixinException: @Shadow method broadcastChanges()V in mod_mine.mixins.json:ItemCombinerMenuMixin from mod mod_mine was not located in the target class net.minecraft.world.inventory.ItemCombinerMenu. No refMap loaded.`
+- Nguyên nhân g?c r? (Root Cause):
+  + Phuong th?c `broadcastChanges()` thu?c v? l?p cha `AbstractContainerMenu` ch? không du?c khai báo dè (override) trong `ItemCombinerMenu`.
+  + SpongeMixin quy d?nh tru?ng ho?c phuong th?c `@Shadow` b?t bu?c ph?i t?n t?i tr?c ti?p trên l?p m?c tiêu (Target Class). Do `ItemCombinerMenu` không ch?a phuong th?c này, quá trình ánh x? Mixin th?t b?i và gây crash game ngay lúc kh?i d?ng.
+- Cách kh?c ph?c:
+  + Trong [ItemCombinerMenuMixin.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/mixin/ItemCombinerMenuMixin.java): Xóa b? khai báo `@Shadow public abstract void broadcastChanges();`.
+  + Thay th? l?nh g?i b?ng ép ki?u ?o h?p l? trong Java: `((net.minecraft.world.inventory.AbstractContainerMenu) (Object) this).broadcastChanges();`.
+  + Biên d?ch l?i, ch?y 5.699 assertions ki?m th? d?t 100% và tri?n khai t?p JAR m?i (133.739 bytes) vào thu m?c mods c?a Prism Launcher.
+- Cách phòng ng?a:
+  + Tuy?t d?i không khai báo `@Shadow` cho các phuong th?c ho?c tru?ng thu?c v? l?p cha c?a l?p m?c tiêu. N?u c?n g?i phuong th?c l?p cha, hãy ép ki?u d?i tu?ng `(SuperClass) (Object) this` và g?i bình thu?ng.

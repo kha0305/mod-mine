@@ -329,3 +329,20 @@ Theo dõi chi tiết tiến độ phát triển, thay đổi mã nguồn và cá
 - Chạy thành công toàn bộ 5.699 assertions kiểm thử trong `FabricQACheckTest`, `FabricIntegrationTest` và bộ kiểm thử `common` (100% pass).
 - Đã đóng gói bản JAR đầy đủ (133.723 bytes) và triển khai trực tiếp vào thư mục mods của Prism Launcher:
   `C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\mod_mine-fabric-0.1.0.jar`.
+
+
+---
+
+## [2026-11-20] - X? L� Ngo?i L? InvalidMixinException Trong ItemCombinerMenuMixin (BUG-010)
+
+### 1. M?c ti�u k? thu?t
+- Kh?c ph?c l?i crash game l�c kh?i d?ng do @Shadow method broadcastChanges()V kh�ng t�m th?y trong ItemCombinerMenu.
+- G?i phuong th?c roadcastChanges() c?a AbstractContainerMenu th�ng qua �p ki?u an to�n.
+
+### 2. Danh s�ch t?p d� ch?nh s?a/t?o m?i
+- [ItemCombinerMenuMixin.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/mixin/ItemCombinerMenuMixin.java): Lo?i b? @Shadow th?a v� �p ki?u tr?c ti?p sang AbstractContainerMenu.
+- [SO_TAY_KIEM_TRA_BUG.md](file:///D:/tool/mod-mine/SO_TAY_KIEM_TRA_BUG.md): C?p nh?t h? so l?i BUG-010.
+
+### 3. K?t qu? ki?m tra
+- To�n b? 5.699 assertions ki?m th? d?t 100%.
+- �� d�ng g�i l?i b?n JAR m?i (133.739 bytes) v� tri?n khai v�o Prism Launcher.

@@ -32,9 +32,6 @@ public abstract class ItemCombinerMenuMixin {
     @Final
     protected ResultContainer resultSlots;
 
-    @Shadow
-    public abstract void broadcastChanges();
-
     @Inject(method = "slotsChanged", at = @At("RETURN"))
     private void onAfterSlotsChanged(Container container, CallbackInfo ci) {
         if (!((Object) this instanceof AnvilMenu anvilMenu)) {
@@ -77,7 +74,7 @@ public abstract class ItemCombinerMenuMixin {
 
                 ItemStack resultStack = input.copy();
                 this.resultSlots.setItem(0, resultStack);
-                this.broadcastChanges();
+                ((net.minecraft.world.inventory.AbstractContainerMenu) (Object) this).broadcastChanges();
             }
         }
     }
