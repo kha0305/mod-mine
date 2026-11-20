@@ -106,17 +106,20 @@ public class QualityItemFilterTest {
         }
         System.out.printf("Bao hiem Ngoc Luc Bao cuu thoat %d / 500 lan nguy hiem thanh cong!\n", emeraldSavedCount);
 
-        // 8. Kiem tra Bao hiem van may (Pity System) tai moc 8 lan dap (Chac chan ra EPIC hoac LEGENDARY va khong bao gio vo)
+        // 8. Kiem tra Bao hiem van may (Pity System) luy tien
+        // Khi cham nguong Pity cua bac hien tai, 100% lan dap phai nang cap len bac cao hon va khong bao gio vo
         for (int i = 0; i < 100; i++) {
-            QualityItemFilter.ReforgeResult result = QualityItemFilter.performReforge(QualityTier.COMMON, 8, 0, false);
-            if (result.broken()) {
-                throw new IllegalStateException("Loi: Moc 8 Pity khong the bi vo do!");
+            QualityItemFilter.ReforgeResult resultUncommon = QualityItemFilter.performReforge(QualityTier.UNCOMMON, 4, 0, false);
+            if (resultUncommon.broken() || !resultUncommon.upgraded() || resultUncommon.resultingTier().ordinal() <= QualityTier.UNCOMMON.ordinal()) {
+                throw new IllegalStateException("Loi Pity UNCOMMON moc 4 lan dap: phai nang cap len cao hon UNCOMMON!");
             }
-            if (result.resultingTier() != QualityTier.EPIC && result.resultingTier() != QualityTier.LEGENDARY) {
-                throw new IllegalStateException("Loi Bao hiem moc 8: Phai ra Epic hoac Legendary, thuc te: " + result.resultingTier());
+
+            QualityItemFilter.ReforgeResult resultEpic = QualityItemFilter.performReforge(QualityTier.EPIC, 7, 0, false);
+            if (resultEpic.broken() || !resultEpic.upgraded() || resultEpic.resultingTier() != QualityTier.LEGENDARY) {
+                throw new IllegalStateException("Loi Pity EPIC moc 7 lan dap: phai chac chan len LEGENDARY!");
             }
         }
-        System.out.println("Bao hiem van may (Moc 8 lan dap 100% ra Epic hoac Legendary, an toan tuyet doi) dat 100%!");
+        System.out.println("Bao hiem van may luy tien (Cham moc threshold 100% nang cap bac cao hon) dat 100%!");
 
         System.out.println("Kiem thu QualityItemFilter thanh cong hoan hao dat 100%!");
     }

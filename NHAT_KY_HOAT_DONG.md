@@ -303,3 +303,29 @@ Theo dõi chi tiết tiến độ phát triển, thay đổi mã nguồn và cá
 - Chạy thành công toàn bộ 5.699 assertions trong `FabricQACheckTest` và `FabricIntegrationTest` (100% pass).
 - Đã đóng gói bản JAR đầy đủ (56.776 bytes) và cập nhật trực tiếp vào thư mục mods của Prism Launcher:
   `C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\mod_mine-fabric-0.1.0.jar`.
+
+
+---
+
+## [2026-11-20] - Xử Lý Xung Đột Đe Với Easy Anvils, Nâng Cấp Tỉ Lệ Rèn Lũy Tiến & Hiển Thị Vận May Pity (BUG-009)
+
+### 1. Mục tiêu kỹ thuật
+- Khắc phục triệt để lỗi không hiện ô kết quả Đe khi môi trường game sử dụng mod `easyanvils` (`FabricAnvilMenu` ghi đè `createResult`).
+- Áp dụng cơ chế nâng cấp lũy tiến (Progressive Upgrade Rate) và bảo hiểm vận may chắc chắn nâng cấp (Pity Guarantee) khi rèn tại Đe, tránh tình trạng đập xịt liên tục không tăng bậc.
+- Hiển thị trực quan tiến trình Pity trên Tooltip (`Reforged: X times (Pity: X/Y - Z% Upgrade Chance)`) màu vàng nổi bật.
+- Đảm bảo hỗ trợ rèn liên tục mượt mà.
+
+### 2. Danh sách tệp đã chỉnh sửa/tạo mới
+- [ItemCombinerMenuMixin.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/mixin/ItemCombinerMenuMixin.java): Can thiệp vào `ItemCombinerMenu.slotsChanged` để mở khóa ô kết quả cho cả Vanilla Anvil và Easy Anvils.
+- [AnvilMenuAccessor.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/mixin/AnvilMenuAccessor.java): Cung cấp quyền truy cập an toàn vào `repairItemCountCost` và `cost`.
+- [mod_mine.mixins.json](file:///D:/tool/mod-mine/fabric/src/main/resources/mod_mine.mixins.json): Đăng ký `ItemCombinerMenuMixin` và `AnvilMenuAccessor`.
+- [QualityItemFilter.java](file:///D:/tool/mod-mine/common/src/main/java/com/minequality/quality/QualityItemFilter.java): Triển khai thuật toán nâng cấp lũy tiến `getUpgradeChancePercent`, `getPityThreshold` và `getGuaranteedHigherTier`.
+- [QualityTooltipBuilder.java](file:///D:/tool/mod-mine/common/src/main/java/com/minequality/quality/QualityTooltipBuilder.java): Định dạng dòng thông tin Pity trên Tooltip.
+- [FabricTooltipHandler.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/event/FabricTooltipHandler.java): Áp dụng màu vàng `§e` và xanh lá `§a§l` cho dòng Pity.
+- [QualityItemFilterTest.java](file:///D:/tool/mod-mine/common/src/test/java/com/minequality/quality/QualityItemFilterTest.java): Cập nhật kiểm thử tự động cho cơ chế Pity lũy tiến.
+- [SO_TAY_KIEM_TRA_BUG.md](file:///D:/tool/mod-mine/SO_TAY_KIEM_TRA_BUG.md): Ghi nhận chi tiết lỗi và giải pháp BUG-009.
+
+### 3. Kết quả kiểm tra
+- Chạy thành công toàn bộ 5.699 assertions kiểm thử trong `FabricQACheckTest`, `FabricIntegrationTest` và bộ kiểm thử `common` (100% pass).
+- Đã đóng gói bản JAR đầy đủ (133.723 bytes) và triển khai trực tiếp vào thư mục mods của Prism Launcher:
+  `C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\mod_mine-fabric-0.1.0.jar`.

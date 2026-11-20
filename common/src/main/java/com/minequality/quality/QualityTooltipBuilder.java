@@ -229,7 +229,12 @@ public final class QualityTooltipBuilder {
         if (tier == QualityTier.LEGENDARY) {
             return String.format("Reforged: %d times (Max Quality Reached)", safeCount);
         }
-        return String.format("Reforged: %d times", safeCount);
+        int threshold = QualityItemFilter.getPityThreshold(tier);
+        int upgradeChance = QualityItemFilter.getUpgradeChancePercent(tier, safeCount);
+        if (safeCount >= threshold) {
+            return String.format("Reforged: %d times (Pity: %d/%d - Guaranteed Next!)", safeCount, safeCount, threshold);
+        }
+        return String.format("Reforged: %d times (Pity: %d/%d - %d%% Upgrade Chance)", safeCount, safeCount, threshold, upgradeChance);
     }
 
     private static String capitalize(String str) {

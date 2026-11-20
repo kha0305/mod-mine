@@ -4,7 +4,9 @@
   "package": "com.minequality.fabric.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "AnvilMenuMixin"
+    "AnvilMenuAccessor",
+    "AnvilMenuMixin",
+    "ItemCombinerMenuMixin"
   ],
   "injectors": {
     "defaultRequire": 1

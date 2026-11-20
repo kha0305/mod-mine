@@ -180,9 +180,15 @@ public final class FabricTooltipHandler {
             return "§d" + line;
         }
 
-        // 7. Thong tin reforge
+        // 7. Thong tin reforge va Pity
         if (line.startsWith("Reforged:")) {
-            return "§8" + line;
+            if (line.contains("Guaranteed")) {
+                return "§a§l" + line;
+            }
+            if (line.contains("Max Quality")) {
+                return "§6" + line;
+            }
+            return "§e" + line;
         }
 
         return "§7" + line;

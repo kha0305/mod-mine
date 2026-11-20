@@ -195,96 +195,124 @@ public final class QualityItemFilter {
         return performReforge(currentTier, reforgeCount, 0, false);
     }
 
+    public static int getPityThreshold(QualityTier currentTier) {
+        if (currentTier == null) {
+            return 2;
+        }
+        return switch (currentTier) {
+            case JUNK -> 1;
+            case COMMON -> 2;
+            case UNCOMMON -> 4;
+            case RARE -> 5;
+            case EPIC -> 7;
+            case LEGENDARY -> 0;
+        };
+    }
+
     /**
-     * Thực hiện cơ chế rèn lại đầy đủ theo chuẩn tài liệu thiết kế mục 7:
-     * - Vùng an toàn (Junk, Common, Uncommon): 100% không bao giờ vỡ đồ.
-     * - Vùng mạo hiểm (Rare, Epic): Có rủi ro vỡ đồ (Rare: 50%, Epic: 75%).
-     * - Giảm 15% rủi ro vỡ đồ nếu có Affinity (từ 25 điểm trở lên).
-     * - Bảo hiểm Ngọc Lục Bảo (Emerald Insurance): Ngọc nát thay cho đồ, cứu sống trang bị.
-     * - Bảo hiểm vận may (Pity System): Thất bại 8 lần chắc chắn ra Epic/Legendary và không thể vỡ.
-     * - Bảo hiểm chống tụt hạng (Keep-Highest Guarantee).
+     * Tinh toan xac suat nang cap thanh cong (%) dua tren pham chat hien tai va so lan dap xit tich luy.
+     */
+    public static int getUpgradeChancePercent(QualityTier currentTier, int reforgeCount) {
+        if (currentTier == QualityTier.LEGENDARY) {
+            return 0;
+        }
+        int threshold = getPityThreshold(currentTier);
+        int safeCount = Math.max(0, reforgeCount);
+        if (safeCount >= threshold) {
+            return 100;
+        }
+
+        int baseChance = switch (currentTier) {
+            case JUNK -> 100;
+            case COMMON -> 50;
+            case UNCOMMON -> 35;
+            case RARE -> 25;
+            case EPIC -> 15;
+            default -> 50;
+        };
+
+        int step = (100 - baseChance) / Math.max(1, threshold);
+        return Math.min(100, baseChance + (safeCount * step));
+    }
+
+    /**
+     * Thuc hien co che ren lai day du theo chuan tai lieu thiet ke:
+     * - Vung an toan (Junk, Common, Uncommon): 100% khong bao gio vo do.
+     * - Vung mao hiem (Rare, Epic): Co rui ro vo do (Rare: 50%, Epic: 75%).
+     * - Giam 15% rui ro vo do neu co Affinity (tu 25 diem tro len).
+     * - Bao hiem Ngoc Luc Bao (Emerald Insurance): Ngoc nat thay cho do, cuu song trang bi.
+     * - Nang cap luy tien: Moi lan dap xit tang ti le thanh cong cho lan toi.
+     * - Bao hiem van may (Pity Guarantee): Dat nguong threshold chac chan 100% len bac cao hon.
+     * - Bao hiem chong tut hang (Keep-Highest Guarantee).
      */
     public static ReforgeResult performReforge(QualityTier currentTier, int reforgeCount, int affinity, boolean hasEmeraldInsurance) {
         QualityTier effectiveCurrent = (currentTier != null) ? currentTier : QualityTier.COMMON;
         int safeCount = Math.max(0, reforgeCount);
 
-        // Nếu đã đạt cấp tối đa (Huyền thoại), giữ nguyên và không cần đập thêm
+        // Neu da dat cap toi da (Huyen thoai), giu nguyen va khong can dap them
         if (effectiveCurrent == QualityTier.LEGENDARY) {
             return new ReforgeResult(QualityTier.LEGENDARY, 0, false, false, false, false);
         }
 
-        // Kiểm tra Vùng Mạo Hiểm (Danger Zone) cho Rare và Epic
-        if (safeCount < 8 && (effectiveCurrent == QualityTier.RARE || effectiveCurrent == QualityTier.EPIC)) {
+        // Kiem tra Vung Mao Hiem (Danger Zone) cho Rare va Epic
+        int pityThreshold = getPityThreshold(effectiveCurrent);
+        boolean isGuaranteedPity = safeCount >= pityThreshold;
+
+        if (!isGuaranteedPity && (effectiveCurrent == QualityTier.RARE || effectiveCurrent == QualityTier.EPIC)) {
             double baseBreakChance = (effectiveCurrent == QualityTier.RARE) ? 0.50 : 0.75;
             double affinityReduction = ItemAffinity.getBreakChanceReduction(affinity);
             double effectiveBreakChance = Math.max(0.0, baseBreakChance - affinityReduction);
 
             if (RANDOM.nextDouble() < effectiveBreakChance) {
-                // Rơi vào nguy cơ tạch vỡ đồ!
+                // Roi vao nguy co tach vo do!
                 if (hasEmeraldInsurance) {
-                    // Vé Bảo Hiểm Ngọc Lục Bảo: Ngọc nát vụn thay cho trang bị, cứu sống món đồ!
+                    // Ve Bao Hiem Ngoc Luc Bao: Ngoc nat vun thay cho trang bi, cuu song mon do!
                     return new ReforgeResult(effectiveCurrent, safeCount + 1, false, false, false, true);
                 } else {
-                    // Không có bảo hiểm: Món đồ vỡ nát hoàn toàn!
+                    // Khong co bao hiem: Mon do vo nat hoan toan!
                     return new ReforgeResult(null, 0, false, false, true, false);
                 }
             }
         }
 
-        boolean pityTriggered = false;
-        QualityTier rolledTier;
+        int upgradeChance = getUpgradeChancePercent(effectiveCurrent, safeCount);
+        boolean rollSuccess = (RANDOM.nextInt(100) < upgradeChance) || isGuaranteedPity;
 
-        // Cơ chế Bảo Hiểm Tích Lũy Vận May (Pity System)
-        if (safeCount >= 8) {
-            // Mốc 8 lần đập: Chắc chắn ra Sử thi hoặc Huyền thoại (75% Sử thi, 25% Huyền thoại)
-            pityTriggered = true;
-            rolledTier = (RANDOM.nextInt(100) < 25) ? QualityTier.LEGENDARY : QualityTier.EPIC;
-        } else if (safeCount >= 5) {
-            // Mốc 5 lần đập: Đảm bảo tối thiểu nhận Bền chắc (Uncommon) trở lên
-            pityTriggered = true;
-            rolledTier = rollAboveOrEqual(QualityTier.UNCOMMON);
-        } else if (safeCount >= 3) {
-            // Mốc 3 lần đập: Loại bỏ hoàn toàn khả năng rơi vào Phế phẩm (Junk)
-            pityTriggered = true;
-            rolledTier = rollAboveOrEqual(QualityTier.COMMON);
+        if (rollSuccess) {
+            // Nang cap thanh cong len bac cao hon!
+            QualityTier nextTier = getGuaranteedHigherTier(effectiveCurrent);
+            return new ReforgeResult(nextTier, 0, true, isGuaranteedPity, false, false);
         } else {
-            // Dưới 3 lần: Bốc thăm trọng số thông thường
-            rolledTier = QualityManager.rollQuality();
-        }
-
-        // Cơ chế Bảo Hiểm Chống Tụt Hạng: Không bao giờ bị rớt phẩm chất thấp hơn hiện tại
-        if (rolledTier.ordinal() > effectiveCurrent.ordinal()) {
-            // Nâng cấp thành công!
-            return new ReforgeResult(rolledTier, 0, true, pityTriggered, false, false);
-        } else {
-            // Đập xịt hoặc bằng cấp cũ: Giữ nguyên phẩm chất cao nhất hiện có, tăng số lần tích lũy bảo hiểm
-            return new ReforgeResult(effectiveCurrent, safeCount + 1, false, pityTriggered, false, false);
+            // Dap xit: Giu nguyen pham chat hien tai, tich luy them 1 lan cho Pity lan toi
+            return new ReforgeResult(effectiveCurrent, safeCount + 1, false, false, false, false);
         }
     }
 
-    private static QualityTier rollAboveOrEqual(QualityTier minTier) {
-        QualityTier safeMinTier = (minTier != null) ? minTier : QualityTier.COMMON;
-        QualityTier[] allTiers = QualityTier.values();
+    private static QualityTier getGuaranteedHigherTier(QualityTier current) {
+        QualityTier[] tiers = QualityTier.values();
+        int currentOrd = current.ordinal();
+        if (currentOrd >= tiers.length - 1) {
+            return QualityTier.LEGENDARY;
+        }
+
+        // Bốc thăm trong số các bậc cao hơn bậc hiện tại theo tỉ lệ trọng số
         int totalWeight = 0;
-        for (QualityTier t : allTiers) {
-            if (t.ordinal() >= safeMinTier.ordinal()) {
-                totalWeight += t.getWeight();
-            }
+        for (int i = currentOrd + 1; i < tiers.length; i++) {
+            totalWeight += tiers[i].getWeight();
         }
         if (totalWeight <= 0) {
-            return safeMinTier;
+            return tiers[Math.min(tiers.length - 1, currentOrd + 1)];
         }
+
         int roll = RANDOM.nextInt(totalWeight);
-        int current = 0;
-        for (QualityTier t : allTiers) {
-            if (t.ordinal() >= safeMinTier.ordinal()) {
-                current += t.getWeight();
-                if (roll < current) {
-                    return t;
-                }
+        int currentWeight = 0;
+        for (int i = currentOrd + 1; i < tiers.length; i++) {
+            currentWeight += tiers[i].getWeight();
+            if (roll < currentWeight) {
+                return tiers[i];
             }
         }
-        return safeMinTier;
+        return tiers[Math.min(tiers.length - 1, currentOrd + 1)];
     }
 
     private static String normalizeId(String id) {

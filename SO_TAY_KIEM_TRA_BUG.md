@@ -140,3 +140,26 @@ Sổ tay theo dõi nguyên nhân gốc rễ và biện pháp phòng ngừa các 
   + Biên dịch `--release 21`, chạy qua toàn bộ 5.699 assertions kiểm thử đạt 100% và đóng gói JAR mới (56.776 bytes) vào Prism Launcher.
 - Cách phòng ngừa:
   + Khi mở rộng các khối tương tác Vanilla (Anvil, Smithing Table, Enchanting Table, Brewing Stand), bắt buộc phải sử dụng Mixin để can thiệp vào các điều kiện kiểm tra của Vanilla, không chỉ phụ thuộc vào logic kiểm tra đơn thuần ngoài vòng đời container.
+
+
+---
+
+### [BUG-009] - Xung Đột Đe Với Mod Easy Anvils Khiến Ô Kết Quả Bị Rỗng & Rèn Lại Bị Xịt Liên Tục Không Tăng Bậc
+- Thời gian: 2026-11-20
+- Hiện tượng lỗi:
+  + Khi môi trường game có cài mod `easyanvils` (`easyanvils-v26.3.1-mc26.3.x+fabric.jar`), người chơi đặt Cúp Sắt + Thỏi Sắt vào Đe thì ô kết quả bị trống rỗng hoàn toàn, không thể rèn lại.
+  + Khi rèn lại thành công ở các bản thử nghiệm trước, người chơi đập nhiều lần liên tiếp bị mất nguyên liệu và EXP nhưng phẩm chất trang bị không hề tăng (giữ nguyên bậc), đồng thời giao diện Tooltip không thể hiện tiến trình tích lũy vận may (Pity) khiến người chơi lầm tưởng tính năng rèn bị lỗi.
+- Nguyên nhân gốc rễ (Root Cause):
+  + Mod `easyanvils` thay thế giao diện Đe bằng `ModAnvilMenu` / `FabricAnvilMenu`. Lớp `FabricAnvilMenu` ghi đè hoàn toàn phương thức `createResult()` và không gọi `super.createResult()` của Minecraft gốc. Do đó, Mixin `AnvilMenuMixin` nhắm vào `AnvilMenu.createResult()` bị bỏ qua hoàn toàn.
+  + Thuật toán rèn cũ trong `QualityItemFilter` phụ thuộc vào bảng trọng số ngẫu nhiên thuần túy: Khi trang bị ở bậc Uncommon, tỉ lệ rơi vào các bậc bằng hoặc thấp hơn lên tới 85%. Do cơ chế "Bảo hiểm chống tụt hạng", 85% này giữ nguyên bậc cũ. Việc thiếu cơ chế tăng tỉ lệ thành công lũy tiến theo số lần đập xịt khiến người chơi có thể đập 4-5 lần xui xẻo liên tiếp mà không nâng cấp được.
+  + Tooltip trong `QualityTooltipBuilder` chỉ ghi `Reforged: X times` màu xám mờ (`§8`), không hiển thị tiến trình tích lũy Pity nên người chơi không nhận biết được nỗ lực của mình.
+- Cách khắc phục:
+  + Triển khai [ItemCombinerMenuMixin.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/mixin/ItemCombinerMenuMixin.java): Can thiệp vào phương thức `slotsChanged(Container)` của lớp cha `ItemCombinerMenu` (lớp gốc dùng chung của cả Vanilla `AnvilMenu` và `ModAnvilMenu` của Easy Anvils). Ngay khi `slotsChanged` chạy xong mà ô kết quả bị rỗng nhưng là công thức rèn hợp lệ, hệ thống lập tức mở khóa ô kết quả và cập nhật chi phí qua [AnvilMenuAccessor.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/mixin/AnvilMenuAccessor.java).
+  + Nâng cấp thuật toán Nâng Cấp Lũy Tiến (Progressive Upgrade) trong [QualityItemFilter.java](file:///D:/tool/mod-mine/common/src/main/java/com/minequality/quality/QualityItemFilter.java):
+    * Bổ sung hàm `getPityThreshold(tier)` xác định mốc chạm đỉnh: Junk -> 1 lần, Common -> 2 lần, Uncommon -> 4 lần, Rare -> 5 lần, Epic -> 7 lần.
+    * Bổ sung hàm `getUpgradeChancePercent(tier, reforgeCount)`: Mỗi lần rèn xịt tăng thêm tỉ lệ thành công cơ sở; khi chạm mốc threshold thì 100% lần rèn kế tiếp chắc chắn nâng cấp lên bậc cao hơn (`getGuaranteedHigherTier`).
+  + Cập nhật [QualityTooltipBuilder.java](file:///D:/tool/mod-mine/common/src/main/java/com/minequality/quality/QualityTooltipBuilder.java) và [FabricTooltipHandler.java](file:///D:/tool/mod-mine/fabric/src/main/java/com/minequality/fabric/event/FabricTooltipHandler.java):
+    * Hiển thị dòng tiến trình trực quan: `Reforged: X times (Pity: X/Y - Z% Upgrade Chance)` với màu vàng nổi bật (`§e`). Khi chắc chắn lên cấp hiển thị `(Pity: Y/Y - Guaranteed Next!)` màu xanh lá in đậm (`§a§l`).
+  + Đóng gói lại toàn bộ JAR (133.723 bytes) và triển khai vào thư mục mods của Prism Launcher.
+- Cách phòng ngừa:
+  + Khi can thiệp các container GUI có nhiều mod tùy biến (như Đe, Lò rèn, Rương), luôn can thiệp vào lớp cha trừu tượng cao nhất (`ItemCombinerMenu`, `AbstractContainerMenu`) kết hợp Accessor Mixin để đảm bảo khả năng tương thích xuyên mod.
