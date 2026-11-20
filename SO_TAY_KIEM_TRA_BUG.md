@@ -40,3 +40,22 @@ Sổ tay theo dõi nguyên nhân gốc rễ và biện pháp phòng ngừa các 
   + Bổ sung phương thức đồng bộ `reforge(boolean)` trong [ItemQualityData.java](file:///D:/tool/mod-mine/common/src/main/java/com/minequality/quality/ItemQualityData.java#L175-L181) để hỗ trợ tương thích hai chiều.
   + Khởi tạo giao diện Logger và LoggerFactory chuẩn SLF4J nội bộ tại [Logger.java](file:///D:/tool/mod-mine/common/src/main/java/org/slf4j/Logger.java) và [LoggerFactory.java](file:///D:/tool/mod-mine/common/src/main/java/org/slf4j/LoggerFactory.java) phục vụ biên dịch độc lập zero-dependency.
 - Cách phòng ngừa: Kiểm tra đối chiếu signature các phương thức public giữa các mô-đun trước khi hoàn tất và bổ sung kiểm thử biên dịch chéo tự động.
+
+
+---
+
+### [BUG-004] - Lỗi Xung Đột Phiên Bản Java Runtime Trên Fabric Loader (Incompatible mods found)
+- Thời gian: 2026-11-20
+- Hiện tượng lỗi: Khởi động game Minecraft Fabric 26.3 qua Prism Launcher bị dừng với thông báo lỗi:
+  `Mod 'MineQuality' (mod_mine) 0.1.0 requires version 26 or later of 'OpenJDK 64-Bit Server VM' (java), but only the wrong version is present: 25!`
+- Nguyên nhân gốc rễ (Root Cause):
+  + Tệp cấu hình `fabric/src/main/resources/fabric.mod.json` khai báo cứng ràng buộc `"java": ">=26"`.
+  + Môi trường thực tế của instance Prism Launcher đang chạy phiên bản OpenJDK 25.
+  + Bytecode được biên dịch nhắm tới Java 26 thay vì tương thích ngược với các runtime LTS/phổ biến.
+- Cách khắc phục:
+  + Chỉnh sửa `fabric/src/main/resources/fabric.mod.json` tại dòng 24: đổi `"java": ">=26"` thành `"java": ">=21"`.
+  + Biên dịch lại toàn bộ mã nguồn với cờ `--release 21` bằng JDK 26 để tạo bytecode tương thích từ Java 21 đến Java 26.
+  + Tự động đóng gói lại và cập nhật tệp `mod_mine-fabric-0.1.0.jar` vào thư mục mods của Prism Launcher tại `C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\`.
+- Cách phòng ngừa:
+  + Luôn sử dụng `--release 21` cho các dự án Minecraft hiện đại nếu mã nguồn không sử dụng tính năng chỉ có riêng ở các bản Java mới hơn.
+  + Khai báo ràng buộc Java trong `fabric.mod.json` ở mức tối thiểu tương thích (`>=21`) thay vì ép người dùng phải dùng đúng bản Java mới nhất.

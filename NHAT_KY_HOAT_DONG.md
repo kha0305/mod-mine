@@ -205,3 +205,18 @@ Theo dõi chi tiết tiến độ phát triển, thay đổi mã nguồn và cá
   + NeoForge JAR chứa đầy đủ `META-INF/neoforge.mods.toml`, `NeoForgeTooltipHandler.class`, `SpecialEffectHandler.class`.
   + Forge JAR chứa đầy đủ `META-INF/mods.toml`, `ForgeTooltipHandler.class`, `QualityItemFilter.class`.
 - Toàn bộ 4 mô-đun đã được kiểm chứng độc lập và chéo với hơn 40.000 lượt kiểm thử áp lực không có bất kỳ lỗi nào.
+
+
+---
+
+## [2026-11-20] - Xử Lý Lỗi Xung Đột Java 25 Trên Prism Launcher (BUG-004)
+
+### 1. Mục tiêu kỹ thuật
+- Khắc phục lỗi dừng game khi khởi động trên Prism Launcher (instance Fabric 26.3): `requires version 26 or later of 'OpenJDK 64-Bit Server VM' (java), but only the wrong version is present: 25!`.
+- Hạ ràng buộc Java trong `fabric.mod.json` xuống `java: >=21` và biên dịch toàn bộ mã nguồn với cờ `--release 21` để tương thích hoàn toàn cho Java 21, Java 25 và Java 26.
+- Tự động triển khai tệp `mod_mine-fabric-0.1.0.jar` mới vào thư mục instance mods của Prism Launcher.
+
+### 2. Kết quả kiểm tra
+- Tệp `mod_mine-fabric-0.1.0.jar` mới đã được ghi đè thành công tại `C:\Users\ASUS\AppData\Roaming\PrismLauncher\instances\Fabric 26.3\minecraft\mods\`.
+- Đã kiểm tra trích xuất `fabric.mod.json` bên trong tệp JAR xác nhận giá trị `"java": ">=21"`.
+- Ghi nhận đầy đủ vào [SO_TAY_KIEM_TRA_BUG.md](file:///D:/tool/mod-mine/SO_TAY_KIEM_TRA_BUG.md).
