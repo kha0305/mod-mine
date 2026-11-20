@@ -222,3 +222,24 @@ Sổ tay theo dõi nguyên nhân gốc rễ và biện pháp phòng ngừa các 
 - Cách phòng ngừa:
   + Khi tùy biến thuộc tính trang bị hiển thị qua Tooltip riêng của mod, luôn ẩn thuộc tính gốc qua Display.hidden() để tránh bị Vanilla in lặp lại.
   + Khi thay đổi thuộc tính Máu tối đa của sinh vật, luôn đồng bộ việc hồi máu tương ứng để tránh tình trạng xuất hiện tim đen rỗng.
+
+---
+
+### [BUG-013] - Chỉ Nhận 13 Quả Tim (26 HP) Thay Vì Đủ 20 Quả Tim (40 HP) Khi Mặc Cả Bộ Giáp
+- Thời gian: 2026-11-20
+- Hiện tượng lỗi:
+  + Người chơi mặc đủ 4 món giáp Huyền thoại (Mũ, Áo, Quần, Giày) nhưng trên màn hình chỉ có 13 quả tim đỏ (10 tim ở hàng dưới + 3 tim ở hàng trên), không đạt mốc 20 quả tim (40 HP).
+- Nguyên nhân gốc rễ (Root Cause):
+  + Trong Minecraft 1.21+ / 26.3, các AttributeModifier được lưu trữ trong AttributeInstance dưới dạng ánh xạ Map<Identifier, AttributeModifier>.
+  + Mod khai báo thuộc tính Máu tối đa của cả 4 món giáp với cùng một định danh chung: Identifier.fromNamespaceAndPath("minequality", "quality_health_bonus").
+  + Do trùng Identifier, Minecraft coi cả 4 món là cùng 1 modifier duy nhất và chỉ nạp món sau cùng (chiếc Quần với +6 HP = 3 quả tim). Ba món còn lại (Mũ +4 HP, Áo +6 HP, Giày +4 HP) bị ghi đè, dẫn đến người chơi chỉ nhận 20 HP gốc + 6 HP = 26 HP (13 quả tim).
+- Cách khắc phục:
+  + Phân biệt Identifier riêng biệt theo từng vị trí giáp:
+    * Mũ: minequality:quality_head_health_bonus (+4 HP = 2 tim).
+    * Áo: minequality:quality_chest_health_bonus (+6 HP = 3 tim).
+    * Quần: minequality:quality_legs_health_bonus (+6 HP = 3 tim).
+    * Giày: minequality:quality_feet_health_bonus (+4 HP = 2 tim).
+  + Tương tự áp dụng tiền tố slot cho các chỉ số Armor, Toughness và Knockback.
+  + Tổng cả bộ cộng dồn chính xác 20 HP, kết hợp với 20 HP gốc đạt đúng 40 HP (20 quả tim đỏ hoàn chỉnh).
+- Cách phòng ngừa:
+  + Mọi AttributeModifier có thể trang bị đồng thời ở nhiều vị trí (Head, Chest, Legs, Feet, Hands) bắt buộc phải phân biệt Identifier duy nhất theo vị trí (SlotGroup) để tránh bị cơ chế của Minecraft ghi đè.
