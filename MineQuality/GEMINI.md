@@ -32,5 +32,5 @@ Dự án mod Minecraft QoL phẩm chất ngẫu nhiên khi chế tạo (lấy c�
   + Mọi cơ chế tiêu hao tài nguyên nâng cấp phải đi kèm xác suất lũy tiến theo số lần thất bại và có mốc bảo hiểm vận may (Pity Threshold) chắc chắn nâng cấp 100%, không dùng tỉ lệ ngẫu nhiên thuần túy gây ức chế cho người chơi.
   + Luôn phản hồi tiến trình tích lũy trực quan trên Tooltip (`Pity: X/Y`) với màu sắc phân cấp rõ ràng.
 - Nguyên Tắc Sử Dụng @Shadow Trong Mixin:
-  + Trong SpongeMixin, chỉ dùng `@Shadow` cho các thành phần (phương thức hoặc trường) được khai báo trực tiếp trên lớp mục tiêu (Target Class).
-  + Tuyệt đối không dùng `@Shadow` cho các phương thức thuộc về lớp cha của lớp mục tiêu. Để gọi phương thức của lớp cha, bắt buộc phải dùng ép kiểu ảo `((SuperClass) (Object) this).<method>()` để tránh gây lỗi crash game `InvalidMixinException`.
+  + Trong SpongePowered Mixin, chỉ dùng `@Shadow` cho các thành phần (phương thức hoặc trường) được khai báo trực tiếp trên lớp mục tiêu (Target Class).
+  + Tuyệt đối không dùng `@Shadow` cho các thành viên thuộc về lớp cha của lớp mục tiêu. Bắt buộc phải tạo Mixin `@Accessor` hoặc `@Invoker` trên chính lớp cha đó để can thiệp an toàn, tránh triệt để lỗi crash runtime `InvalidMixinException`.
