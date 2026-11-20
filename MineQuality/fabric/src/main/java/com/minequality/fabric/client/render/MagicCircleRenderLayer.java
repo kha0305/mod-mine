@@ -52,8 +52,10 @@ public final class MagicCircleRenderLayer extends RenderLayer<AvatarRenderState,
 
         poseStack.pushPose();
 
-        // 1. Dịch chuyển xuống mặt đất sát chân người chơi (nâng nhẹ 0.02f để tránh Z-fighting với khối bên dưới)
-        poseStack.translate(0.0f, 0.02f, 0.0f);
+        // 1. Dịch chuyển xuống mặt đất sát chân người chơi
+        // Trong hệ tọa độ LivingEntityRenderer, trục Y đảo chiều hướng xuống và đáy bàn chân nằm ở Y = 1.50f.
+        // Đặt Y = 1.49f để vòng tròn ma thuật áp sát mặt sàn (nổi nhẹ 0.01f tránh Z-fighting với khối bên dưới).
+        poseStack.translate(0.0f, 1.49f, 0.0f);
 
         // 2. Góc xoay đều theo thời gian thực (1.5 độ mỗi tick = chu kỳ 12 giây cho 1 vòng tròn 360 độ)
         float angle = (state.ageInTicks * ROTATION_SPEED) % 360.0f;
